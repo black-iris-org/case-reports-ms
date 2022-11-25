@@ -4,7 +4,7 @@ class CreateRevisions < ActiveRecord::Migration[7.0]
       t.belongs_to :case_report, foreign_key: true
       t.date :incident_date
       t.datetime :incident_datetime
-      t.string :report_type
+      t.column :report_type, :smallint
       t.string :responder_name
       t.string :patient_name
       t.date :patient_dob
