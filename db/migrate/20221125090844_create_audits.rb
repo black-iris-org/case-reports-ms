@@ -7,7 +7,7 @@ class CreateAudits < ActiveRecord::Migration[7.0]
       t.string :user_type
       t.column :action, :smallint
 
-      t.timestamps
+      t.datetime :action_at
     end
   end
 end

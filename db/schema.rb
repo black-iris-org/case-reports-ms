@@ -20,29 +20,23 @@ ActiveRecord::Schema[7.0].define(version: 2022_11_25_090844) do
     t.string "user_name"
     t.string "user_type"
     t.integer "action", limit: 2
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "action_at"
     t.index ["revision_id"], name: "index_audits_on_revision_id"
   end
 
   create_table "case_reports", force: :cascade do |t|
     t.integer "incident_number"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
   end
 
   create_table "revisions", force: :cascade do |t|
     t.bigint "case_report_id"
-    t.date "incident_date"
-    t.datetime "incident_datetime"
-    t.string "report_type"
+    t.integer "report_type", limit: 2
     t.string "responder_name"
     t.string "patient_name"
     t.date "patient_dob"
     t.jsonb "incident_address"
     t.integer "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "incident_time"
     t.index ["case_report_id"], name: "index_revisions_on_case_report_id"
   end
 
