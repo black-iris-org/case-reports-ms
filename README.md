@@ -10,13 +10,13 @@
 - Update RubyGems system `gem update --system --force-update`
 - Run `bundle install`
 
-* Ruby version
-- Truffleruby 23.0.0-dev-2f21e36a
+#### Ruby version
+Truffleruby 23.0.0-dev-2f21e36a
 
-* Configuration
+#### Configuration
 - Create your `.env` file
 - Install docker
 - Run `docker compose up -d`
 
-* Database creation
+#### Database creation
 - rails `db:create`
