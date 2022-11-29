@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_11_25_090844) do
+ActiveRecord::Schema[7.0].define(version: 2022_11_28_233003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -30,16 +30,42 @@ ActiveRecord::Schema[7.0].define(version: 2022_11_25_090844) do
 
   create_table "revisions", force: :cascade do |t|
     t.bigint "case_report_id"
+    t.integer "user_id"
     t.integer "report_type", limit: 2
     t.string "responder_name"
     t.string "patient_name"
     t.date "patient_dob"
     t.jsonb "incident_address"
-    t.integer "user_id"
-    t.datetime "incident_time"
+    t.jsonb "content"
+    t.datetime "incident_at"
     t.index ["case_report_id"], name: "index_revisions_on_case_report_id"
   end
 
   add_foreign_key "audits", "revisions"
   add_foreign_key "revisions", "case_reports"
+
+  create_view "case_reports_view", sql_definition: <<-SQL
+      WITH recent_revisions AS (
+           SELECT DISTINCT ON (revisions.case_report_id) revisions.case_report_id,
+              revisions.id
+             FROM revisions
+            ORDER BY revisions.case_report_id, revisions.incident_at DESC
+          ), counts AS (
+           SELECT revisions.case_report_id,
+              count(*) AS revisions_count
+             FROM revisions
+            GROUP BY revisions.case_report_id
+          )
+   SELECT case_reports.id,
+      case_reports.incident_number,
+      recent_revisions.id AS revision_id,
+      counts.revisions_count,
+          CASE
+              WHEN (counts.revisions_count = 1) THEN 0
+              ELSE 1
+          END AS report_type
+     FROM ((case_reports
+       JOIN recent_revisions ON ((case_reports.id = recent_revisions.case_report_id)))
+       JOIN counts ON ((case_reports.id = counts.case_report_id)));
+  SQL
 end
