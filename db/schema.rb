@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_11_28_233003) do
+ActiveRecord::Schema[7.0].define(version: 2022_11_29_011812) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -31,7 +31,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_11_28_233003) do
   create_table "revisions", force: :cascade do |t|
     t.bigint "case_report_id"
     t.integer "user_id"
-    t.integer "report_type", limit: 2
     t.string "responder_name"
     t.string "patient_name"
     t.date "patient_dob"
