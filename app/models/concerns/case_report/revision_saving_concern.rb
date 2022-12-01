@@ -11,6 +11,17 @@ module CaseReport::RevisionSavingConcern
       set_instance_to_view
     end
 
+    def update!(attributes)
+      revision_attributes = attributes.delete(:revision_attributes)
+      raise 'cant update' if revision_attributes.blank?
+      transaction do
+        super
+        revisions.create!(revision_attributes)
+        reload
+        true
+      end
+    end
+
     private
 
     def set_instance_to_table
