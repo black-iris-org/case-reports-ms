@@ -2,6 +2,7 @@ module CaseReport::RevisionSavingConcern
   extend ActiveSupport::Concern
 
   included do
+    # Override to write to the table instead of the view
     def create_or_update(**, &block)
       set_instance_to_table
       handle_create_revision
