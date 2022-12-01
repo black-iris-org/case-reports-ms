@@ -6,7 +6,7 @@ class CaseReport < ApplicationRecord
 
   attribute :revision_id
   attribute :revision
-  attr_readonly :revision_id, :revisions_count, :report_type
+  attr_readonly :revision_id, :revisions_count, :report_type, :incident_number
 
   enum report_type: [:original, :amended]
 
