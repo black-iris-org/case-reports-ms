@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_12_01_163622) do
+ActiveRecord::Schema[7.0].define(version: 2022_12_03_183301) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -26,6 +26,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_01_163622) do
 
   create_table "case_reports", force: :cascade do |t|
     t.integer "incident_number"
+    t.datetime "incident_at", default: -> { "CURRENT_TIMESTAMP" }
   end
 
   create_table "revisions", force: :cascade do |t|
@@ -36,7 +37,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_01_163622) do
     t.date "patient_dob"
     t.jsonb "incident_address", default: "{}"
     t.jsonb "content", default: "{}"
-    t.datetime "incident_at", default: -> { "CURRENT_TIMESTAMP" }
     t.index ["case_report_id"], name: "index_revisions_on_case_report_id"
   end
 
@@ -48,7 +48,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_01_163622) do
            SELECT DISTINCT ON (revisions.case_report_id) revisions.case_report_id,
               revisions.id
              FROM revisions
-            ORDER BY revisions.case_report_id, revisions.incident_at DESC
+            ORDER BY revisions.case_report_id, revisions.id DESC
           ), counts AS (
            SELECT revisions.case_report_id,
               count(*) AS revisions_count
@@ -57,6 +57,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_01_163622) do
           )
    SELECT case_reports.id,
       case_reports.incident_number,
+      case_reports.incident_at,
       recent_revisions.id AS revision_id,
       counts.revisions_count,
           CASE
