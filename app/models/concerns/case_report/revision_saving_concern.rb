@@ -5,21 +5,18 @@ module CaseReport::RevisionSavingConcern
     # Override to write to the table instead of the view
     def create_or_update(**, &block)
       set_instance_to_table
-      handle_create_revision
       super
     ensure
       set_instance_to_view
     end
 
     def update!(attributes)
-      revision_attributes = attributes.delete(:revision_attributes)
-      raise 'cant update' if revision_attributes.blank?
-      transaction do
-        super
-        revisions.create!(revision_attributes)
+      if super
         reload
         true
       end
+
+      false
     end
 
     private
@@ -31,15 +28,12 @@ module CaseReport::RevisionSavingConcern
     def set_instance_to_view
       self.class.class_eval { set_to_view }
     end
-
-    def handle_create_revision
-      return if revision.blank? || revision.case_report.present?
-
-      revision.case_report = self
-    end
   end
 
   class_methods do
+    def create!(attributes)
+      super.reload
+    end
 
     private
 
