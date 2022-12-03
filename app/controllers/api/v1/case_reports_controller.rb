@@ -1,5 +1,10 @@
 class Api::V1::CaseReportsController < ApplicationController
   before_action :set_case_report, only: [:show, :update]
+  before_action :set_case_reports, only: [:index]
+
+  def index
+    render json: CaseReportSerializer.render(@case_reports)
+  end
 
   def create
     case_report = CaseReport.create!(create_params)
@@ -35,5 +40,9 @@ class Api::V1::CaseReportsController < ApplicationController
 
   def set_case_report
     @case_report = CaseReport.find(params[:id])
+  end
+
+  def set_case_reports
+    @case_reports = CaseReport.all
   end
 end
