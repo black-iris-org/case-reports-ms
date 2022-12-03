@@ -7,6 +7,8 @@ class Revision < ApplicationRecord
   before_create :set_defaults
   validate :validate_not_identical
 
+  REPORT_COLUMNS = column_names - %w[id case_report_id]
+
   def set_defaults
     self.incident_address ||= {}
     self.content ||= {}

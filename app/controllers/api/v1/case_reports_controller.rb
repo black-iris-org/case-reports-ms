@@ -1,21 +1,36 @@
 class Api::V1::CaseReportsController < ApplicationController
-  before_action :set_case_report, only: :show
+  before_action :set_case_report, only: [:show, :update]
 
   def create
-    render json: CaseReport.create(case_report_create_params)
+    case_report = CaseReport.create!(create_params)
+    render json: CaseReportSerializer.render(case_report)
+  end
+
+  def update
+    @case_report.update!(update_params)
+    render json: CaseReportSerializer.render(@case_report.reload)
   end
 
   def show
-    render json: @case_report
+    render json: CaseReportSerializer.render(@case_report)
   end
 
   private
 
+  def create_params
+    case_report_create_params.merge(revisions_attributes: [revision_attributes])
+  end
+
+  def update_params
+    { revisions_attributes: [revision_attributes] }
+  end
+
   def case_report_create_params
-    params.require(:case_report).permit(
-      :incident_number,
-      revision_attributes: %w[user_id responder_name patient_name patient_dob incident_address content incident_at]
-    )
+    params.require(:case_report).permit(:incident_number)
+  end
+
+  def revision_attributes
+    params.permit(Revision::REPORT_COLUMNS)
   end
 
   def set_case_report
