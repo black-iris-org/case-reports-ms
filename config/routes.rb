@@ -5,7 +5,9 @@ Rails.application.routes.draw do
   # root "articles#index"
   namespace :api, defaults: { format: :json } do
     namespace :v1 do
-      resources :case_reports, only: [:create, :show, :update, :index]
+      resources :case_reports, only: [:create, :show, :update, :index] do
+        resources :revisions, only: [:index, :show]
+      end
     end
   end
 end

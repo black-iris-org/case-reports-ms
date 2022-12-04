@@ -4,4 +4,8 @@ class CaseReportSerializer < ApplicationSerializer
          :revision_id, :revisions_count, :report_type
 
   association :revision, blueprint: RevisionSerializer
+
+  view :without_revision do
+    exclude :revision
+  end
 end

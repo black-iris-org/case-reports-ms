@@ -23,4 +23,13 @@ class CaseReport < ApplicationRecord
   def set_defaults
     self.incident_at ||= Time.now
   end
+
+  def set_custom_revision(value)
+    instance_eval do
+      def revision
+        @revision
+      end
+    end
+    @revision = value
+  end
 end
