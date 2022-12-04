@@ -1,0 +1,6 @@
+class RevisionSerializer < ApplicationSerializer
+  identifier :id
+  fields :case_report_id, :user_id, :responder_name,
+         :patient_name, :patient_dob, :incident_address,
+         :content
+end
