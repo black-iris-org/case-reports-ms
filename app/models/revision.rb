@@ -7,7 +7,9 @@ class Revision < ApplicationRecord
   before_create :set_defaults
   validate :validate_not_identical
 
-  REPORT_COLUMNS = column_names - %w[id case_report_id]
+  REPORT_COLUMNS = column_names - %w[id case_report_id user_id]
+
+  scope :with_case_report, -> { eager_load(:case_report) }
 
   scope :with_case_report, -> { eager_load(:case_report) }
 
