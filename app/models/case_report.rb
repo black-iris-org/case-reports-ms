@@ -7,7 +7,7 @@ class CaseReport < ApplicationRecord
   attribute :revision_id
   attribute :revision
   attr_readonly :revision_id, :revisions_count, :report_type,
-                :incident_number, :incident_at
+                :incident_number, :incident_at, :datacenter_id
 
   enum report_type: [:original, :amended]
 
@@ -16,7 +16,7 @@ class CaseReport < ApplicationRecord
 
   accepts_nested_attributes_for :revisions
 
-  validates_presence_of :incident_number
+  validates_presence_of :datacenter_id, :incident_number
 
   before_create :set_defaults
 

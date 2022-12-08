@@ -31,7 +31,7 @@ class Api::V1::CaseReportsController < ApplicationController
   end
 
   def case_report_create_params
-    params.require(:case_report).permit(:incident_number)
+    params.require(:case_report).permit(:datacenter_id, :incident_number)
   end
 
   def revision_attributes
