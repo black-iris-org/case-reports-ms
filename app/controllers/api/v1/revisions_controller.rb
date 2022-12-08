@@ -1,9 +1,12 @@
 class Api::V1::RevisionsController < ApplicationController
+  include AuditsConcern
+
   before_action :set_case_reports, only: [:index, :show]
   before_action :set_case_report, only: [:index, :show]
   before_action :set_revisions, only: [:index, :show]
   before_action :set_user_filter, only: [:index, :show]
   before_action :set_revision, only: [:show]
+  after_action :add_audit_record, only: [:show]
 
   def index
     if @case_report.present?
@@ -42,6 +45,7 @@ class Api::V1::RevisionsController < ApplicationController
   def set_revision
     @revision = @revisions.find(params[:id])
     @case_report = @revision.case_report if @case_report.blank?
+    @revision_id = @revision.id
   end
 
   def set_user_filter

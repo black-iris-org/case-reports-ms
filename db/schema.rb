@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_12_08_061247) do
+ActiveRecord::Schema[7.0].define(version: 2022_12_08_154437) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -20,7 +20,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_08_061247) do
     t.string "user_name"
     t.string "user_type"
     t.integer "action", limit: 2
-    t.datetime "action_at"
+    t.datetime "action_at", default: -> { "CURRENT_TIMESTAMP" }
     t.index ["revision_id"], name: "index_audits_on_revision_id"
   end
 

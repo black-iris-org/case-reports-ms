@@ -1,18 +1,23 @@
 class Api::V1::CaseReportsController < ApplicationController
+  include AuditsConcern
+
   before_action :set_case_report, only: [:show, :update]
   before_action :set_case_reports, only: [:index]
+  after_action :add_audit_record, only: [:create, :show, :update]
 
   def index
     render json: CaseReportSerializer.render(@case_reports)
   end
 
   def create
-    case_report = CaseReport.create!(create_params)
-    render json: CaseReportSerializer.render(case_report)
+    @case_report = CaseReport.create!(create_params)
+    @revision_id = @case_report.revision_id
+    render json: CaseReportSerializer.render(@case_report)
   end
 
   def update
     @case_report.update!(update_params)
+    @revision_id = @case_report.revision_id
     render json: CaseReportSerializer.render(@case_report.reload)
   end
 
@@ -40,6 +45,7 @@ class Api::V1::CaseReportsController < ApplicationController
 
   def set_case_report
     @case_report = CaseReport.find(params[:id])
+    @revision_id = @case_report.revision_id
   end
 
   def set_case_reports
