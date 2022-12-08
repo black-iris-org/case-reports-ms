@@ -5,9 +5,9 @@ module AuditsConcern
     def add_audit_record(action = action_name)
       Audit.create!(
         revision_id: @revision_id,
-        user_id: request.headers['Requester-Id'],
-        user_name: request.headers['Requester-Name'],
-        user_type: request.headers['Requester-Type'],
+        user_id: requester_id,
+        user_name: requester_name,
+        user_type: requester_role,
         action: action
       )
     rescue StandardError => exception
