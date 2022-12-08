@@ -9,6 +9,8 @@ class Revision < ApplicationRecord
 
   REPORT_COLUMNS = column_names - %w[id case_report_id]
 
+  scope :with_case_report, -> { eager_load(:case_report) }
+
   def set_defaults
     self.incident_address ||= {}
     self.content ||= {}

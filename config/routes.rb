@@ -8,6 +8,10 @@ Rails.application.routes.draw do
       resources :case_reports, only: [:create, :show, :update, :index] do
         resources :revisions, only: [:index, :show]
       end
+      resources :users do
+        resources :revisions, only: [:index, :show]
+      end
+      resources :revisions, only: [:index, :show]
     end
   end
 end

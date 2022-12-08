@@ -168,6 +168,7 @@ GEM
       railties (>= 4.0.0)
     shoulda-matchers (5.2.0)
       activesupport (>= 5.2.0)
+    spring (4.1.0)
     thor (1.2.1)
     timeout (0.3.0)
     tzinfo (2.0.5)
@@ -192,6 +193,7 @@ DEPENDENCIES
   rspec-rails (~> 6.0.0)
   scenic
   shoulda-matchers
+  spring
   tzinfo-data
 
 RUBY VERSION

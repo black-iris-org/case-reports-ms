@@ -20,6 +20,9 @@ class CaseReport < ApplicationRecord
 
   before_create :set_defaults
 
+  scope :without_review_column, -> { select(column_names - ['review_id']) }
+  scope :with_revision, -> { eager_load(:revision) }
+
   def set_defaults
     self.incident_at ||= Time.now
   end
