@@ -1,9 +1,10 @@
 class Api::V1::AuditsController < ApplicationController
   include PaginationConcern
 
+  include FiltrationConcern
+
   before_action :set_audits
   before_action :set_revision_filter
-  before_action :set_case_report_filter
 
   def index
     render json: AuditSerializer.render(paginate(@audits), root: :audits, meta: pagination_status)
@@ -12,7 +13,7 @@ class Api::V1::AuditsController < ApplicationController
   private
 
   def set_audits
-    @audits = Audit.all
+    @audits = Audit.filter_records(filtration_params)
   end
 
   def set_revision_filter
@@ -21,20 +22,7 @@ class Api::V1::AuditsController < ApplicationController
     @audits = @audits.where(revision_id: params[:revision_id])
   end
 
-  def set_case_report_filter
-    return unless params[:case_report_id].present?
-
-
-
-    @audits = @audits.includes(revision: :case_report)
-                     .where(
-                       revisions: {
-                         case_reports_view: {
-                           id: params[:case_report_id]
-                         }
-                       }
-                     )
-
-    warn @audits.to_sql
+  def filtration_params
+    default_filtration_params.merge(case_report_id: params[:case_report_id])
   end
 end

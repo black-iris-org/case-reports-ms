@@ -1,5 +1,6 @@
 class CaseReport < ApplicationRecord
   include CaseReport::RevisionSavingConcern
+  include CaseReport::FilterConcern
 
   self.primary_key = :id
   set_to_view

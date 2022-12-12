@@ -1,4 +1,5 @@
 class Api::V1::RevisionsController < ApplicationController
+  include FiltrationConcern
   include AuditsConcern
   include PaginationConcern
 
@@ -36,7 +37,7 @@ class Api::V1::RevisionsController < ApplicationController
   private
 
   def set_case_reports
-    @case_reports = CaseReport.with_revision
+    @case_reports = CaseReport.with_revision.filter_records(default_filtration_params)
   end
 
   def set_case_report

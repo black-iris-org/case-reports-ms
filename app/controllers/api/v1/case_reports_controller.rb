@@ -1,9 +1,10 @@
 class Api::V1::CaseReportsController < ApplicationController
   include AuditsConcern
   include PaginationConcern
+  include FiltrationConcern
 
+  before_action :set_case_reports, only: [:show, :update, :index]
   before_action :set_case_report, only: [:show, :update]
-  before_action :set_case_reports, only: [:index]
   after_action :add_audit_record, only: [:create, :show, :update]
 
   def index
@@ -45,11 +46,11 @@ class Api::V1::CaseReportsController < ApplicationController
   end
 
   def set_case_report
-    @case_report = CaseReport.find(params[:id])
+    @case_report = @case_reports.find(params[:id])
     @revision_id = @case_report.revision_id
   end
 
   def set_case_reports
-    @case_reports = CaseReport.all
+    @case_reports = CaseReport.filter_records(default_filtration_params)
   end
 end
