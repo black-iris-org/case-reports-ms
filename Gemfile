@@ -39,6 +39,9 @@ gem "bootsnap", require: false
 # For managing DB views
 gem 'scenic'
 
+# For pagination
+gem 'pagy'
+
 # For serializers
 gem 'blueprinter'
 

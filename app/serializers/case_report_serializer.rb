@@ -11,6 +11,8 @@ class CaseReportSerializer < ApplicationSerializer
 
   view :with_revisions do
     include_view :without_revision
-    association :revisions, blueprint: RevisionSerializer
+    association :revisions, blueprint: RevisionSerializer do |case_report, options|
+      options[:custom_revision_list] || case_report.revisions
+    end
   end
 end

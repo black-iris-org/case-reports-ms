@@ -1,10 +1,12 @@
 class Api::V1::AuditsController < ApplicationController
+  include PaginationConcern
+
   before_action :set_audits
   before_action :set_revision_filter
   before_action :set_case_report_filter
 
   def index
-    render json: AuditSerializer.render(@audits, root: :audits)
+    render json: AuditSerializer.render(paginate(@audits), root: :audits, meta: pagination_status)
   end
 
   private

@@ -112,6 +112,8 @@ GEM
     nokogiri (1.13.9)
       mini_portile2 (~> 2.8.0)
       racc (~> 1.4)
+    pagy (5.10.1)
+      activesupport
     pg (1.4.5)
     puma (5.6.5)
       nio4r (~> 2.0)
@@ -187,6 +189,7 @@ DEPENDENCIES
   dotenv-rails
   factory_bot_rails
   faker
+  pagy
   pg (~> 1.1)
   puma (~> 5.0)
   rails (~> 7.0.4)
