@@ -34,11 +34,11 @@ class Api::V1::CaseReportsController < ApplicationController
   end
 
   def update_params
-    { revisions_attributes: [revision_attributes] }
+    params.permit(:case_report_name).merge({ revisions_attributes: [revision_attributes] })
   end
 
   def case_report_create_params
-    params.require(:case_report).permit(:incident_number).merge(datacenter_id: requester_datacenter)
+    params.require(:case_report).permit(:incident_number, :case_report_name).merge(datacenter_id: requester_datacenter)
   end
 
   def revision_attributes

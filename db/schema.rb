@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_12_08_154437) do
+ActiveRecord::Schema[7.0].define(version: 2022_12_14_101956) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -38,6 +38,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_08_154437) do
     t.date "patient_dob"
     t.jsonb "incident_address", default: "{}"
     t.jsonb "content", default: "{}"
+    t.string "case_report_name", null: false
     t.index ["case_report_id"], name: "index_revisions_on_case_report_id"
   end
 
@@ -47,7 +48,8 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_08_154437) do
   create_view "case_reports_view", sql_definition: <<-SQL
       WITH recent_revisions AS (
            SELECT DISTINCT ON (revisions.case_report_id) revisions.case_report_id,
-              revisions.id
+              revisions.id,
+              revisions.case_report_name
              FROM revisions
             ORDER BY revisions.case_report_id, revisions.id DESC
           ), counts AS (
@@ -60,6 +62,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_08_154437) do
       case_reports.incident_number,
       case_reports.incident_at,
       case_reports.datacenter_id,
+      recent_revisions.case_report_name,
       recent_revisions.id AS revision_id,
       counts.revisions_count,
           CASE
