@@ -6,7 +6,7 @@ module CaseReport::FilterConcern
 
   class_methods do
     def filterable_attributes
-      [:datacenter_id]
+      [:datacenter_id, :incident_id]
     end
   end
 end
