@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_12_14_101956) do
+ActiveRecord::Schema[7.0].define(version: 2022_12_15_102132) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -28,6 +28,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_14_101956) do
     t.integer "incident_number"
     t.datetime "incident_at", default: -> { "CURRENT_TIMESTAMP" }
     t.integer "datacenter_id", null: false
+    t.integer "incident_id", null: false
   end
 
   create_table "revisions", force: :cascade do |t|
@@ -60,6 +61,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_14_101956) do
           )
    SELECT case_reports.id,
       case_reports.incident_number,
+      case_reports.incident_id,
       case_reports.incident_at,
       case_reports.datacenter_id,
       recent_revisions.case_report_name,

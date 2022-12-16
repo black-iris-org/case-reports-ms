@@ -17,12 +17,13 @@ class CaseReport < ApplicationRecord
 
   accepts_nested_attributes_for :revisions
 
-  validates_presence_of :datacenter_id, :incident_number
+  validates_presence_of :datacenter_id, :incident_number, :incident_id
 
   before_create :set_defaults
 
   scope :without_review_column, -> { select(column_names - ['review_id']) }
   scope :with_revision, -> { eager_load(:revision) }
+  scope :by_incident_id, ->(incident_id){ where(incident_id: incident_id) }
 
   def set_defaults
     self.incident_at ||= Time.now
