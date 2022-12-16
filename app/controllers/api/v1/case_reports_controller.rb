@@ -42,7 +42,7 @@ class Api::V1::CaseReportsController < ApplicationController
   end
 
   def revision_attributes
-    params.permit(Revision::REPORT_COLUMNS).merge(user_id: requester_id)
+    params.permit(Revision::PRIMITIVE_COLUMNS.dup << Revision::JSONB_COLUMNS).merge(user_id: requester_id)
   end
 
   def set_case_report
