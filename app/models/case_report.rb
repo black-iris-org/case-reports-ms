@@ -22,6 +22,8 @@ class CaseReport < ApplicationRecord
 
   before_create :set_defaults
 
+  validates_presence_of :revisions, on: :create
+
   scope :without_review_column, -> { select(column_names - ['review_id']) }
   scope :with_revision, -> { eager_load(:revision) }
   scope :by_incident_id, ->(incident_id){ where(incident_id: incident_id) }
