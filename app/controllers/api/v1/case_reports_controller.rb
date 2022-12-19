@@ -35,19 +35,25 @@ class Api::V1::CaseReportsController < ApplicationController
   private
 
   def create_params
-    case_report_create_params.merge(revisions_attributes: [revision_attributes])
+    params.require(:case_report).permit(:incident_number, :incident_at, :incident_id).merge(
+      datacenter_id: requester_datacenter,
+      revisions_attributes: [revision_params]
+    )
   end
 
   def update_params
-    params.permit(:case_report_name).merge({ revisions_attributes: [revision_attributes] })
-  end
-
-  def case_report_create_params
-    params.require(:case_report).permit(:incident_number, :case_report_name, :incident_id).merge(datacenter_id: requester_datacenter)
+    {
+      datacenter_id: requester_datacenter,
+      revisions_attributes: [revision_params]
+    }
   end
 
   def revision_attributes
-    params.permit(Revision::PRIMITIVE_COLUMNS.dup << Revision::JSONB_COLUMNS).merge(user_id: requester_id)
+    Revision::PRIMITIVE_COLUMNS.dup << Revision::JSONB_COLUMNS
+  end
+
+  def revision_params
+    params.require(:case_report).permit(*revision_attributes).merge(user_id: requester_id)
   end
 
   def set_case_report
