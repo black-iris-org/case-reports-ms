@@ -17,8 +17,6 @@ Rails.application.routes.draw do
       resources :revisions, only: [:index, :show] do
         resources :audits, only: [:index]
       end
-
-      get 'case_reports/incidents/:incident_id', to: 'case_reports#incidents', as: 'incident_case_reports'
     end
   end
 end

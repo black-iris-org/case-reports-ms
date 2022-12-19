@@ -3,7 +3,7 @@ class Api::V1::CaseReportsController < ApplicationController
   include PaginationConcern
   include FiltrationConcern
 
-  before_action :set_case_reports, only: [:show, :update, :index, :incidents]
+  before_action :set_case_reports, only: [:show, :update, :index]
   before_action :set_case_report, only: [:show, :update]
   after_action :add_audit_record, only: [:create, :show, :update]
 
@@ -25,11 +25,6 @@ class Api::V1::CaseReportsController < ApplicationController
 
   def show
     render json: CaseReportSerializer.render(@case_report, root: :case_report)
-  end
-
-  def incidents
-    @case_reports = CaseReport.filter_records(default_filtration_params_with_incident)
-    render json: CaseReportSerializer.render(@case_reports, root: :case_reports)
   end
 
   private

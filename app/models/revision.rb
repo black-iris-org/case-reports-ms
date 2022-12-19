@@ -18,7 +18,6 @@ class Revision < ApplicationRecord
   validates :case_report_name, presence: true
 
   scope :with_case_report, -> { eager_load(:case_report) }
-  scope :with_case_report, -> { eager_load(:case_report) }
 
   serialize :incident_address, Serializers::IndifferentHash
   serialize :content, Serializers::IndifferentHash
