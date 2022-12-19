@@ -29,6 +29,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_15_102132) do
     t.datetime "incident_at", default: -> { "CURRENT_TIMESTAMP" }
     t.integer "datacenter_id", null: false
     t.integer "incident_id", null: false
+    t.index ["incident_id"], name: "index_case_reports_on_incident_id"
   end
 
   create_table "revisions", force: :cascade do |t|
