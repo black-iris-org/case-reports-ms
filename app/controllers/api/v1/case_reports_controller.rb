@@ -51,12 +51,16 @@ class Api::V1::CaseReportsController < ApplicationController
     params.require(:case_report).permit(*revision_attributes).merge(user_id: requester_id)
   end
 
+  def filters
+    params.permit(:incident_id).merge(default_filtration_params)
+  end
+
   def set_case_report
     @case_report = @case_reports.find(params[:id])
     @revision_id = @case_report.revision_id
   end
 
   def set_case_reports
-    @case_reports = CaseReport.filter_records(default_filtration_params)
+    @case_reports = CaseReport.filter_records(filters.to_h).order(id: :desc)
   end
 end
