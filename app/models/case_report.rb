@@ -8,7 +8,8 @@ class CaseReport < ApplicationRecord
   attribute :revision_id
   attribute :revision
   attr_readonly :revision_id, :revisions_count, :report_type,
-                :incident_number, :incident_at, :datacenter_id
+                :incident_number, :incident_at, :datacenter_id,
+                :incident_id
 
   enum report_type: [:original, :amended]
 
