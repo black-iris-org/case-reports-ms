@@ -21,6 +21,8 @@ Rails.application.routes.draw do
       resources :incidents, only: [] do
         resources :case_reports, only: [:index]
       end
+
+      resources :audits, only: [:index]
     end
   end
 end
