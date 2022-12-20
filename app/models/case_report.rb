@@ -8,7 +8,8 @@ class CaseReport < ApplicationRecord
   attribute :revision_id
   attribute :revision
   attr_readonly :revision_id, :revisions_count, :report_type,
-                :incident_number, :incident_at, :datacenter_id
+                :incident_number, :incident_at, :datacenter_id,
+                :incident_id
 
   enum report_type: [:original, :amended]
 
@@ -20,6 +21,8 @@ class CaseReport < ApplicationRecord
   validates_presence_of :datacenter_id, :incident_number, :incident_id
 
   before_create :set_defaults
+
+  validates_presence_of :revisions, on: :create
 
   scope :without_review_column, -> { select(column_names - ['review_id']) }
   scope :with_revision, -> { eager_load(:revision) }

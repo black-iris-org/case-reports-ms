@@ -15,9 +15,8 @@ class Revision < ApplicationRecord
   }.freeze
   PRIMITIVE_COLUMNS = (column_names - %w[id case_report_id user_id] - JSONB_COLUMNS.keys.map(&:to_s)).freeze
 
-  validates :case_report_name, presence: true
+  validates_presence_of :name
 
-  scope :with_case_report, -> { eager_load(:case_report) }
   scope :with_case_report, -> { eager_load(:case_report) }
 
   serialize :incident_address, Serializers::IndifferentHash

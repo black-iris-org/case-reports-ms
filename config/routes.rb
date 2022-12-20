@@ -18,7 +18,9 @@ Rails.application.routes.draw do
         resources :audits, only: [:index]
       end
 
-      get 'case_reports/incidents/:incident_id', to: 'case_reports#incidents', as: 'incident_case_reports'
+      resources :incidents, only: [] do
+        resources :case_reports, only: [:index]
+      end
     end
   end
 end
