@@ -11,13 +11,14 @@ class Api::V1::AuditsController < ApplicationController
   private
 
   def set_audits
-    @audits = Audit.filter_records(filtration_params)
+    @audits = Audit.filter_records(filtration_params).order(id: :desc)
+  end
+
+  def index_params
+    params.permit(:case_report_id, :revision_id, :action_at, :action_time_from, :action_time_to)
   end
 
   def filtration_params
-    filters = default_filtration_params
-    filters[:case_report_id] = params[:case_report_id] if params[:case_report_id].present?
-    filters[:revision_id] = params[:revision_id] if params[:revision_id].present?
-    filters
+    default_filtration_params.merge(index_params.to_h).compact
   end
 end

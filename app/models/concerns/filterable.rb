@@ -3,7 +3,9 @@ module Filterable
 
   class_methods do
     def filter_records(filters)
-      build_relations(filters.symbolize_keys).reduce(all) { |relation, query| query.merge(relation) }
+      build_relations(filters.symbolize_keys).reduce(all) do |base, new_relation|
+        base.send(new_relation[:op], new_relation[:value])
+      end
     end
 
     # array of strings of model attributes that support being filtered through a basic where statement
@@ -11,12 +13,11 @@ module Filterable
       []
     end
 
-    def add_filter(filter_name, &block)
-      filter_name = filter_name.to_sym
-      custom_filters[filter_name] = block
+    def add_filter(filter_name, op = :merge, &block)
+      custom_filters[filter_name.to_sym] = { op: op, block: block }
     end
 
-    private
+    # private
 
     def custom_filters
       @custom_filters ||= {}
@@ -28,9 +29,9 @@ module Filterable
 
     def get_relation(filter_name, value)
       if custom_filters.key?(filter_name)
-        custom_filters[filter_name].call(value)
+        { op: custom_filters[filter_name][:op], value: custom_filters[filter_name][:block].call(value) }
       elsif filterable_attributes.include?(filter_name)
-        where(filter_name => value)
+        { op: :merge, value: where(filter_name => value) }
       else
         raise FilterNotSupported, "Filtering by '#{filter_name}' is not supported."
       end
