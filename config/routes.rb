@@ -24,6 +24,9 @@ Rails.application.routes.draw do
 
       resources :audits, only: [:index]
       resources :audit_reports, only: [:create]
+
+      #remove after beacon is updated to not break testing
+      get 'case_reports/incidents/:incident_id', to: 'case_reports#incidents', as: 'incident_case_reports'
     end
   end
 end
