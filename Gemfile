@@ -45,6 +45,9 @@ gem 'pagy'
 # For serializers
 gem 'blueprinter'
 
+#mailer
+gem 'mailgun-ruby'
+
 group :development do
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   gem "spring"
