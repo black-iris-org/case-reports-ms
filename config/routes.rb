@@ -23,6 +23,7 @@ Rails.application.routes.draw do
       end
 
       resources :audits, only: [:index]
+      resources :audit_reports, only: [:create]
     end
   end
 end
