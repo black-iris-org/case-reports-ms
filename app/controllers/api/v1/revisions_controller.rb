@@ -51,8 +51,11 @@ class Api::V1::RevisionsController < ApplicationController
   end
 
   def set_revisions
-    @revisions = @case_report.present? ? @case_report.revisions : Revision.all
-    @revisions = @revisions.with_case_report
+    if @case_report.present?
+      @revisions = @case_report.revisions.with_case_report
+    else
+      @revisions = Revision.filter_records(default_filtration_params).with_case_report
+    end
   end
 
   def set_revision
