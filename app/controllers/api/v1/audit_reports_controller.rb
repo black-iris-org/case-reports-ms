@@ -8,7 +8,7 @@ class Api::V1::AuditReportsController < ApplicationController
       incident_ids,
       authorized_datacenter_ids,
       params[:utc_offset],
-      params[:user_id],
+      requester_id,
       params[:user_email]
       )
     render json: { message: 'Report is being generated' }, status: :ok
