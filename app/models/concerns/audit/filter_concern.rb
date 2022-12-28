@@ -28,7 +28,7 @@ module Audit::FilterConcern
 
   class_methods do
     def filterable_attributes
-      [:revision_id]
+      [:revision_id, :user_id]
     end
   end
 end
