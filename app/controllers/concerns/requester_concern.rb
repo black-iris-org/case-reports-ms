@@ -6,8 +6,8 @@ module RequesterConcern
 
     REQUESTER_HEADERS = {
       requester_id: :'Requester-Id',
-      requester_role: :'Requester-Name',
-      requester_name: :'Requester-Role',
+      requester_role: :'Requester-Role',
+      requester_name: :'Requester-Name',
       requester_datacenter: :'Requester-Datacenter',
       requester_authorized: :'Requester-Authorized'
     }
