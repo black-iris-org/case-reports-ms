@@ -48,6 +48,9 @@ gem 'blueprinter'
 #mailer
 gem 'mailgun-ruby'
 
+# cloud storage & attachments
+gem "aws-sdk-s3"
+
 group :development do
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   gem "spring"
