@@ -1,5 +1,6 @@
 class Revision < ApplicationRecord
   include Revision::FilterConcern
+  include Revision::FilesConcern
 
   belongs_to :case_report, optional: true
   has_many :audits
@@ -8,16 +9,6 @@ class Revision < ApplicationRecord
 
   before_create :set_defaults
   validate :validate_not_identical
-
-  has_many_attached :files
-
-  def files_attributes=(value)
-    value.each { |item| files_blobs << ActiveStorage::Blob.create(item) }
-  end
-
-  def direct_upload_urls
-    files.map { |file| file&.service&.send(:object_for, file&.key)&.presigned_url(:put) }
-  end
 
   JSONB_COLUMNS = {
     incident_address: [:zip],
