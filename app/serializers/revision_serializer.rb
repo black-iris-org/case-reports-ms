@@ -4,6 +4,8 @@ class RevisionSerializer < ApplicationSerializer
          :patient_name, :patient_dob, :incident_address,
          :content, :name
 
+  field :direct_upload_urls, if: ->(_field_name, _user, options) { options[:with_direct_upload_urls] }
+
   view :with_case_report do
     excludes :case_report_id
     association :case_report, blueprint: CaseReportSerializer, view: :without_revision

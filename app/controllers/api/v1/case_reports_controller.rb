@@ -14,7 +14,8 @@ class Api::V1::CaseReportsController < ApplicationController
   def create
     @case_report = CaseReport.create!(create_params)
     @revision_id = @case_report.revision_id
-    render json: CaseReportSerializer.render(@case_report, root: :case_report)
+    options = { with_direct_upload_urls: revision_params[:files_attributes].present? }
+    render json: CaseReportSerializer.render(@case_report, root: :case_report, **options)
   end
 
   def update
@@ -44,7 +45,8 @@ class Api::V1::CaseReportsController < ApplicationController
   end
 
   def revision_attributes
-    Revision::PRIMITIVE_COLUMNS.dup << Revision::JSONB_COLUMNS
+    attributes = (Revision::PRIMITIVE_COLUMNS.dup << Revision::JSONB_COLUMNS)
+    attributes << { files_attributes: [:filename, :checksum, :byte_size, :content_type] }
   end
 
   def revision_params
