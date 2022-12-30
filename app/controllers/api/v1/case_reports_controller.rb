@@ -14,14 +14,21 @@ class Api::V1::CaseReportsController < ApplicationController
   def create
     @case_report = CaseReport.create!(create_params)
     @revision_id = @case_report.revision_id
-    options = { with_direct_upload_urls: revision_params[:files_attributes].present? }
-    render json: CaseReportSerializer.render(@case_report, root: :case_report, **options)
+    render json: CaseReportSerializer.render(@case_report, root: :case_report, **serializer_options)
   end
 
   def update
-    @case_report.update!(update_params)
+    if file_params_present?
+      @case_report.update!(update_params)
+    else
+      previous_revision = @case_report.revision
+      ActiveRecord::Base.transaction do
+        @case_report.update!(update_params)
+        @case_report.revision.files_blobs += previous_revision.files_blobs
+      end
+    end
     @revision_id = @case_report.revision_id
-    render json: CaseReportSerializer.render(@case_report.reload, root: :case_report)
+    render json: CaseReportSerializer.render(@case_report.reload, root: :case_report, **serializer_options)
   end
 
   def show
@@ -53,6 +60,10 @@ class Api::V1::CaseReportsController < ApplicationController
     params.require(:case_report).permit(*revision_attributes).merge(user_id: requester_id)
   end
 
+  def file_params_present?
+    revision_params[:files_attributes].present?
+  end
+
   def filters
     params.permit(:incident_id).merge(default_filtration_params)
   end
@@ -64,5 +75,9 @@ class Api::V1::CaseReportsController < ApplicationController
 
   def set_case_reports
     @case_reports = CaseReport.filter_records(filters.to_h).order(id: :desc)
+  end
+
+  def serializer_options
+    { with_direct_upload_urls: file_params_present? }
   end
 end
