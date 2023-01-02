@@ -11,11 +11,11 @@ class Api::V1::AuditsController < ApplicationController
   private
 
   def set_audits
-    @audits = Audit.filter_records(filtration_params).order(id: :desc)
+    @audits = Audit.eager_load(:case_report).filter_records(filtration_params).order(id: :desc)
   end
 
   def index_params
-    params.permit(:case_report_id, :revision_id, :action_at, :action_time_from, :action_time_to, :user_id)
+    params.permit(:case_report_id, :revision_id, :action_at, :action_time_from, :action_time_to, :user_id, :incident_number)
   end
 
   def filtration_params

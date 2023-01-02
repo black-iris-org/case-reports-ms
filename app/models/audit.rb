@@ -2,6 +2,9 @@ class Audit < ApplicationRecord
   include Audit::FilterConcern
 
   belongs_to :revision
+  has_one :case_report, through: :revision
+  delegate :incident_number, to: :case_report
+
   enum action: [:show, :create, :update], _prefix: true
 
   scope :last_30_days, lambda { |incident_ids, authorized_datacenter_ids, utc_offset = nil|
