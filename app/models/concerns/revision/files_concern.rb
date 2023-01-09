@@ -8,7 +8,10 @@ module Revision::FilesConcern
     has_many_attached :files
 
     def files_attributes=(value)
-      value.each { |item| files_blobs << ActiveStorage::Blob.create(item) }
+      value.each do |item|
+        blob = item.is_a?(ActiveStorage::Blob) ? item : ActiveStorage::Blob.create(item)
+        files_blobs << blob
+      end
     end
 
     def direct_upload_urls

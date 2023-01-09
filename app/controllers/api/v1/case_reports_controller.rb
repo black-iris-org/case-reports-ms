@@ -18,15 +18,7 @@ class Api::V1::CaseReportsController < ApplicationController
   end
 
   def update
-    if file_params_present?
-      @case_report.update!(update_params)
-    else
-      previous_revision = @case_report.revision
-      ActiveRecord::Base.transaction do
-        @case_report.update!(update_params)
-        @case_report.revision.files_blobs += previous_revision.files_blobs
-      end
-    end
+    @case_report.update!(update_params)
     @revision_id = @case_report.revision_id
     render json: CaseReportSerializer.render(@case_report.reload, root: :case_report, **serializer_options)
   end
@@ -53,15 +45,42 @@ class Api::V1::CaseReportsController < ApplicationController
 
   def revision_attributes
     attributes = (Revision::PRIMITIVE_COLUMNS.dup << Revision::JSONB_COLUMNS)
-    attributes << { files_attributes: [:filename, :checksum, :byte_size, :content_type] }
+    attributes << { files_attributes: files_attributes }
+  end
+
+  def files_params
+    params.require(:case_report).permit(
+      files_attributes: [:filename, :checksum, :byte_size, :content_type],
+      add_files_attributes: [:filename, :checksum, :byte_size, :content_type],
+      remove_files_attributes: [],
+    )
+  end
+
+  def files_attributes
+    return files_params[:files_attributes] if files_params[:files_attributes].present?
+
+    files_attributes = @case_report&.revision&.files_blobs.to_a || []
+
+    add_files_attributes = files_params[:add_files_attributes] || []
+    remove_files_attributes = files_params[:remove_files_attributes]
+
+    files_attributes += add_files_attributes if add_files_attributes.present?
+
+    if remove_files_attributes.present?
+      files_attributes.reject! { |file| remove_files_attributes.include? file[:filename] }
+    end
+
+    puts files_attributes.inspect
+
+    files_attributes
   end
 
   def revision_params
-    params.require(:case_report).permit(*revision_attributes).merge(user_id: requester_id)
+    params.require(:case_report).permit(*revision_attributes).merge(user_id: requester_id, files_attributes: files_attributes)
   end
 
   def file_params_present?
-    revision_params[:files_attributes].present?
+    files_params.present?
   end
 
   def filters
