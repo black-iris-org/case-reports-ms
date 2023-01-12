@@ -2,7 +2,7 @@ class RevisionSerializer < ApplicationSerializer
   identifier :id
   fields :case_report_id, :user_id, :responder_name,
          :patient_name, :patient_dob, :incident_address,
-         :content, :name
+         :content, :name, :attachments
 
   field :direct_upload_urls, if: ->(_field_name, _user, options) { options[:with_direct_upload_urls] }
 
