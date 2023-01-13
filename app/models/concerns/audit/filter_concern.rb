@@ -21,6 +21,10 @@ module Audit::FilterConcern
       includes(:case_report).where(case_reports_view: { incident_number: value })
     end
 
+    add_filter(:incident_id)  do |value|
+      includes(:case_report).where(case_reports_view: { incident_id: value })
+    end
+
     add_filter(:action_time_from, :and) do |value|
       where(action_at: (value.to_time)..nil)
     end
