@@ -1,6 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
+
+source /etc/profile.d/rvm.sh
 
 if [ -f tmp/pids/server.pid ]; then
   rm tmp/pids/server.pid
