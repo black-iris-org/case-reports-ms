@@ -3,6 +3,7 @@ class Api::V1::CaseReportsController < ApplicationController
   include PaginationConcern
   include FiltrationConcern
 
+  before_action :perform_authorization, only: [:index]
   before_action :set_case_reports, only: [:show, :update, :index]
   before_action :set_case_report, only: [:show, :update]
   after_action :add_audit_record, only: [:create, :show, :update]
@@ -84,7 +85,7 @@ class Api::V1::CaseReportsController < ApplicationController
   end
 
   def filters
-    params.permit(:incident_id).merge(default_filtration_params)
+    params.permit(:incident_id).merge(default_filtration_params).merge(auth_params)
   end
 
   def set_case_report
@@ -98,5 +99,19 @@ class Api::V1::CaseReportsController < ApplicationController
 
   def serializer_options
     { with_direct_upload_urls: file_params_present? }
+  end
+
+  def auth_params
+    @auth_params || {}
+  end
+
+  def perform_authorization
+    if UserRole::MOBILE_USER_ROLES.include?(requester_role)
+      if params[:incident_id].blank?
+        render json: { error: 'Not authorized' }, status: :unauthorized and return
+      else
+        @auth_params = {user_id: requester_id}
+      end
+    end
   end
 end

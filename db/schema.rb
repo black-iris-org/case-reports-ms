@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_12_27_212813) do
+ActiveRecord::Schema[7.0].define(version: 2023_01_17_120001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -80,7 +80,8 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_27_212813) do
       WITH recent_revisions AS (
            SELECT DISTINCT ON (revisions.case_report_id) revisions.case_report_id,
               revisions.id,
-              revisions.name
+              revisions.name,
+              revisions.user_id
              FROM revisions
             ORDER BY revisions.case_report_id, revisions.id DESC
           ), counts AS (
@@ -96,6 +97,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_27_212813) do
       case_reports.datacenter_id,
       recent_revisions.name,
       recent_revisions.id AS revision_id,
+      recent_revisions.user_id,
       counts.revisions_count,
           CASE
               WHEN (counts.revisions_count = 1) THEN 0
