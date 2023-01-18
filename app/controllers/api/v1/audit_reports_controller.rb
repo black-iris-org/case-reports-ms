@@ -13,7 +13,7 @@ class Api::V1::AuditReportsController < ApplicationController
   end
 
   def set_audits
-    @audits = Audit.includes(:case_report).filter_records(filtration_params).order(id: :desc)
+    @audits = Audit.filter_records(filtration_params).order(id: :desc)
   end
 
   def validate_email_presence
