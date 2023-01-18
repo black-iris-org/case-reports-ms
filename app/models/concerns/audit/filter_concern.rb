@@ -30,7 +30,7 @@ module Audit::FilterConcern
     end
 
     add_filter(:action_time_to, :and) do |value|
-      where(action_at: nil..(value.to_time))
+      where(action_at: nil..(value.to_time + 1.day))
     end
   end
 
