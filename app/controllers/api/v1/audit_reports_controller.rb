@@ -1,6 +1,6 @@
 class Api::V1::AuditReportsController < ApplicationController
   include FiltrationConcern
-  before_action :validate_email_presence, :set_audits
+  before_action :set_audits
 
   def create
     AuditReportJob.perform_later(
@@ -14,12 +14,6 @@ class Api::V1::AuditReportsController < ApplicationController
 
   def set_audits
     @audits = Audit.filter_records(filtration_params).order(id: :desc)
-  end
-
-  def validate_email_presence
-    return if params[:user_email].present?
-
-    render json: { error: 'Email is required' }, status: :unprocessable_entity
   end
 
   def create_params
