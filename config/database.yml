@@ -29,6 +29,31 @@ development:
   <<: *default
   database: case_reports_development
 
+
+staging:
+  <<: *default
+  database: case_reports_staging
+  username: <%= ENV['BEACON_RDS_USERNAME'] %>
+  password: <%= ENV['BEACON_RDS_PASSWORD'] %>
+  host: <%= ENV['BEACON_RDS_HOST'] %>
+  port: <%= ENV['BEACON_RDS_PORT'] %>
+
+production:
+  <<: *default
+  database: case_reports_rds
+  username: <%= ENV['BEACON_RDS_USERNAME'] %>
+  password: <%= ENV['BEACON_RDS_PASSWORD'] %>
+  host: <%= ENV['BEACON_RDS_HOST'] %>
+  port: <%= ENV['BEACON_RDS_PORT'] %>
+
+paris:
+  <<: *default
+  database: case_reports_paris
+  username: <%= ENV['BEACON_RDS_USERNAME'] %>
+  password: <%= ENV['BEACON_RDS_PASSWORD'] %>
+  host: <%= ENV['BEACON_RDS_HOST'] %>
+  port: <%= ENV['BEACON_RDS_PORT'] %>
+
   # The specified database role being used to connect to postgres.
   # To create additional roles in postgres see `$ createuser --help`.
   # When left blank, postgres will use the default role. This is
@@ -82,7 +107,3 @@ test:
 #
 # Read https://guides.rubyonrails.org/configuring.html#configuring-a-database
 # for a full overview on how database connection configuration can be specified.
-#
-production:
-  <<: *default
-  database: case_reports_production
