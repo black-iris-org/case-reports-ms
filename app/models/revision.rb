@@ -11,7 +11,7 @@ class Revision < ApplicationRecord
   validate :validate_not_identical
 
   JSONB_COLUMNS = {
-    incident_address: [:zip],
+    incident_address: [:name, lat_lng: { coordinates: [] }],
     content: {}
   }.freeze
   PRIMITIVE_COLUMNS = (column_names - %w[id case_report_id user_id] - JSONB_COLUMNS.keys.map(&:to_s)).freeze
