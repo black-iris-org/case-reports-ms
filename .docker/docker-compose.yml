@@ -25,4 +25,4 @@ services:
 
 volumes:
   postgis_data: {}
-  pgadmin: {}
+#  pgadmin: {}
