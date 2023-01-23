@@ -1,4 +1,4 @@
-FROM ruby:3.1.2
+FROM ruby:3.0.3
 RUN apt-get update && apt-get install -y nodejs
 WORKDIR /app
 COPY Gemfile* ./
