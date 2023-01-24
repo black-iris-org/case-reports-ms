@@ -22,7 +22,7 @@ Rails.application.routes.draw do
         resources :case_reports, only: [:index]
       end
 
-      resources :audits, only: [:index]
+      resources :audits, only: [:index, :create]
       resources :audit_reports, only: [:create]
     end
   end
