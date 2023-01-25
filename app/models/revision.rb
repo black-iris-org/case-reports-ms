@@ -5,6 +5,8 @@ class Revision < ApplicationRecord
   belongs_to :case_report, optional: true
   has_many :audits
 
+  has_one :creation_audit, -> { where(action: :create) }, class_name: 'Audit'
+
   validates_presence_of :user_id, :responder_name, :name
 
   before_create :set_defaults
@@ -30,5 +32,9 @@ class Revision < ApplicationRecord
     if case_report&.revision&.attributes&.except('id') == attributes&.except('id')
       errors.add(:base, :cannot_be_identical)
     end
+  end
+
+  def created_at
+    creation_audit&.action_at
   end
 end
