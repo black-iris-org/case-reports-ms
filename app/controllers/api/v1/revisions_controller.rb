@@ -8,7 +8,7 @@ class Api::V1::RevisionsController < ApplicationController
   before_action :set_revisions, only: [:index, :show]
   before_action :set_user_filter, only: [:index, :show]
   before_action :set_revision, only: [:show]
-  after_action :add_audit_record, only: [:show]
+  after_action :add_audit_record, only: [:show], unless: :skip_audit?
 
   def index
     if @case_report.present?

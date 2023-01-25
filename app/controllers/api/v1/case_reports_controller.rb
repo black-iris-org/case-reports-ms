@@ -6,7 +6,7 @@ class Api::V1::CaseReportsController < ApplicationController
   before_action :perform_authorization, only: [:index]
   before_action :set_case_reports, only: [:show, :update, :index]
   before_action :set_case_report, only: [:show, :update]
-  after_action :add_audit_record, only: [:create, :show, :update]
+  after_action :add_audit_record, only: [:create, :show, :update], unless: :skip_audit?
 
   def index
     render json: CaseReportSerializer.render(paginate(@case_reports), root: :case_reports, meta: pagination_status)
