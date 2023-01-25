@@ -12,6 +12,8 @@ class Api::V1::AuditReportsController < ApplicationController
     render json: { message: 'Report is being generated' }, status: :ok
   end
 
+  private
+
   def set_audits
     @audits = Audit.filter_records(filtration_params).order(id: :desc)
   end

@@ -5,7 +5,7 @@ class Revision < ApplicationRecord
   belongs_to :case_report, optional: true
   has_many :audits
 
-  validates_presence_of :user_id, :responder_name
+  validates_presence_of :user_id, :responder_name, :name
 
   before_create :set_defaults
   validate :validate_not_identical
@@ -15,8 +15,6 @@ class Revision < ApplicationRecord
     content: {}
   }.freeze
   PRIMITIVE_COLUMNS = (column_names - %w[id case_report_id user_id] - JSONB_COLUMNS.keys.map(&:to_s)).freeze
-
-  validates_presence_of :name
 
   scope :with_case_report, -> { eager_load(:case_report) }
 

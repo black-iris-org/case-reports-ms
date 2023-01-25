@@ -70,9 +70,6 @@ class Api::V1::CaseReportsController < ApplicationController
     if remove_files_attributes.present?
       files_attributes.reject! { |file| remove_files_attributes.include? file[:filename] }
     end
-
-    puts files_attributes.inspect
-
     files_attributes
   end
 

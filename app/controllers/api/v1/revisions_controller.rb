@@ -31,7 +31,7 @@ class Api::V1::RevisionsController < ApplicationController
 
   def show
     @case_report.set_custom_revision(@revision)
-    render json: CaseReportSerializer.render(@case_report, root: :revision)
+    render json: CaseReportSerializer.render(@case_report, root: :case_report)
   end
 
   private
