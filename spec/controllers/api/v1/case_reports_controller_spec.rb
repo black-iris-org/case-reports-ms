@@ -113,7 +113,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
     end
   end
 
-  describe 'Get #show' do
+  describe 'GET #show' do
     before do
       case_report_1.reload
     end
@@ -151,9 +151,20 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
         expect(json_response[:case_report]['report_type']).to eq('original')
       end
     end
+
+    context 'with skipping audit' do
+      before do
+        get "/api/v1/case_reports/#{case_report_1.id}", headers: headers.merge('X-Skip-Audit': 'true')
+        case_report_1.reload.revision.reload
+      end
+
+      it 'should not create audit' do
+        expect(Audit.count).to eq(0)
+      end
+    end
   end
 
-  describe "Get #index" do
+  describe "GET #index" do
     before do
       case_report_1.reload
       case_report_2.reload
