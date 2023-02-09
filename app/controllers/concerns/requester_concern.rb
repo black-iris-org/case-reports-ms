@@ -11,8 +11,7 @@ module RequesterConcern
       requester_first_name: :'Requester-First-Name',
       requester_last_name: :'Requester-Last-Name',
       requester_datacenter: :'Requester-Datacenter',
-      requester_datacenter_name: :'Requester-Datacenter-Name',
-      requester_authorized: :'Requester-Authorized'
+      requester_datacenter_name: :'Requester-Datacenter-Name'
     }
 
     def validate_requester_headers
@@ -46,10 +45,6 @@ module RequesterConcern
 
     def requester_datacenter_name
       @requester_datacenter_name ||= request.headers[REQUESTER_HEADERS[:requester_datacenter_name]]
-    end
-
-    def requester_authorized
-      @requester_authorized ||= request.headers[REQUESTER_HEADERS[:requester_authorized]]&.split(',')&.map(&:to_i)
     end
   end
 end

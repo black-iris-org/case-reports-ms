@@ -3,7 +3,7 @@ module FiltrationConcern
 
   included do
     def default_filtration_params
-      { datacenter_id: ([requester_datacenter] + requester_authorized).uniq }
+      { datacenter_id: requester_datacenter }
     end
   end
 end

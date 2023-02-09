@@ -17,7 +17,6 @@ RSpec.describe Api::V1::RevisionsController, type: :request do
       'Requester-First-Name': Faker::Name.first_name,
       'Requester-Last-Name': Faker::Name.last_name,
       'Requester-Datacenter': '1',
-      'Requester-Authorized': '1',
     }
   end
 
