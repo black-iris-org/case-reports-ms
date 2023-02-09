@@ -8,7 +8,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
   let(:case_report_3)    { FactoryBot.create(:case_report, incident_id: '2') }
   let(:revision_1)       { case_report_1.reload.revision }
   let(:revision_2)       { case_report_2.reload.revision }
-  let(:valid_attributes) { { incident_number: 1, incident_id: 1, datacenter_id: 1, incident_at: Time.now,
+  let(:valid_attributes) { { incident_number: 1, incident_id: 1, datacenter_id: 1, datacenter_name: 'test', incident_at: Time.now,
                              report_type: :amended, user_id: 1, responder_name: 'test', name: 'test' } }
 
   let(:headers) do
@@ -17,6 +17,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
       'Requester-Role': 'Admin',
       'Requester-Name': Faker::Name.name,
       'Requester-Datacenter': '1',
+      'Requester-Datacenter-Name': 'test',
       'Requester-Authorized': '1',
     }
   end
@@ -30,6 +31,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
       it 'should create case_report' do
         expect(CaseReport.count).to eq(1)
         expect(json_response[:case_report].with_indifferent_access).to include(datacenter_id: 1,
+                                                                               datacenter_name: 'test',
                                                                                incident_id: valid_attributes[:incident_id],
                                                                                incident_number: valid_attributes[:incident_number],
                                                                                report_type: 'original',
@@ -72,6 +74,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
 
       it 'should update case_report' do
         expect(json_response[:case_report].with_indifferent_access).to include(datacenter_id: 1,
+                                                                               datacenter_name: 'test',
                                                                                incident_id: case_report_1.incident_id,
                                                                                incident_number: case_report_1.incident_number,
                                                                                report_type: 'amended',
@@ -126,6 +129,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
 
       it do
         expect(json_response[:case_report].with_indifferent_access).to include(datacenter_id: 1,
+                                                                               datacenter_name: 'test',
                                                                                incident_id: case_report_1.incident_id,
                                                                                incident_number: case_report_1.incident_number,
                                                                                report_type: 'original',
@@ -182,6 +186,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
       it 'case_report_2' do
         expect(json_response[:case_reports].first.with_indifferent_access).to include(id: case_report_2.id,
                                                                                       datacenter_id: 1,
+                                                                                      datacenter_name: 'test',
                                                                                       incident_id: case_report_2.incident_id,
                                                                                       incident_number: case_report_2.incident_number,
                                                                                       report_type: 'original',
@@ -202,6 +207,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
         get "/api/v1/case_reports", headers: headers
         expect(json_response[:case_reports].last.with_indifferent_access).to include(id: case_report_1.id,
                                                                                      datacenter_id: 1,
+                                                                                     datacenter_name: 'test',
                                                                                      incident_id: case_report_1.incident_id,
                                                                                      incident_number: case_report_1.incident_number,
                                                                                      report_type: 'original',
@@ -232,6 +238,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
       it 'case_report_2' do
         expect(json_response[:case_reports].first.with_indifferent_access).to include(id: case_report_2.id,
                                                                                       datacenter_id: 1,
+                                                                                      datacenter_name: 'test',
                                                                                       incident_id: case_report_2.incident_id,
                                                                                       incident_number: case_report_2.incident_number,
                                                                                       report_type: 'original',
@@ -251,6 +258,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
       it 'case_report_1' do
         expect(json_response[:case_reports].last.with_indifferent_access).to include(id: case_report_1.id,
                                                                                      datacenter_id: 1,
+                                                                                     datacenter_name: 'test',
                                                                                      incident_id: case_report_1.incident_id,
                                                                                      incident_number: case_report_1.incident_number,
                                                                                      report_type: 'original',

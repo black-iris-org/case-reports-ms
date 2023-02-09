@@ -7,7 +7,7 @@ class Api::V1::AuditReportsController < ApplicationController
       params[:utc_offset],
       params[:user_email],
       requester_id,
-      Audit.to_csv(@audits, attributes: %i[user_name action action_at incident_number incident_id revision_id])
+      Audit.to_csv(@audits, attributes: %i[datacenter_name user_name action action_at incident_number incident_id revision_id])
       )
     render json: { message: 'Report is being generated' }, status: :ok
   end

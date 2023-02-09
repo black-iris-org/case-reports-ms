@@ -1,6 +1,6 @@
 class CaseReportSerializer < ApplicationSerializer
   identifier :id
-  fields :datacenter_id, :incident_number, :incident_id, :incident_at, :incident_number,
+  fields :datacenter_id, :datacenter_name, :incident_number, :incident_id, :incident_at, :incident_number,
          :revisions_count, :report_type
 
   association :revision, blueprint: RevisionSerializer

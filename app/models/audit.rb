@@ -3,7 +3,7 @@ class Audit < ApplicationRecord
 
   belongs_to :revision
   has_one :case_report, through: :revision
-  delegate :incident_number, :incident_id, to: :case_report
+  delegate :incident_number, :incident_id, :datacenter_name, to: :case_report
   delegate :id, to: :revision
 
   enum action: [:show, :create, :update, :download], _prefix: true

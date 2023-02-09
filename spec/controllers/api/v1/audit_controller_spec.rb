@@ -16,6 +16,7 @@ RSpec.describe Api::V1::AuditsController, type: :request do
       'Requester-Role': 'Admin',
       'Requester-Name': Faker::Name.name,
       'Requester-Datacenter': '1',
+      'Requester-Datacenter-Name': 'test',
       'Requester-Authorized': '1',
     }
   end

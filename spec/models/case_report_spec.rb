@@ -73,6 +73,12 @@ RSpec.describe CaseReport, type: :model do
         case_report.update_attribute(:datacenter_id, 2)
       }.to raise_error(ActiveRecord::ActiveRecordError, 'datacenter_id is marked as readonly')
     end
+
+    it 'datacenter_id' do
+      expect {
+        case_report.update_attribute(:datacenter_name, 'test_2')
+      }.to raise_error(ActiveRecord::ActiveRecordError, 'datacenter_id is marked as readonly')
+    end
   end
 
   describe 'accepts_nested_attributes_for' do
