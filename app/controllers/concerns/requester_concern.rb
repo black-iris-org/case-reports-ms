@@ -8,6 +8,8 @@ module RequesterConcern
       requester_id: :'Requester-Id',
       requester_role: :'Requester-Role',
       requester_name: :'Requester-Name',
+      requester_first_name: :'Requester-First-Name',
+      requester_last_name: :'Requester-Last-Name',
       requester_datacenter: :'Requester-Datacenter',
       requester_datacenter_name: :'Requester-Datacenter-Name',
       requester_authorized: :'Requester-Authorized'
@@ -28,6 +30,14 @@ module RequesterConcern
 
     def requester_name
       @requester_name ||= request.headers[REQUESTER_HEADERS[:requester_name]]
+    end
+
+    def requester_first_name
+      @requester_first_name ||= request.headers[REQUESTER_HEADERS[:requester_first_name]]
+    end
+
+    def requester_last_name
+      @requester_last_name ||= request.headers[REQUESTER_HEADERS[:requester_last_name]]
     end
 
     def requester_datacenter

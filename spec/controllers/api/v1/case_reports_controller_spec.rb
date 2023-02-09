@@ -16,6 +16,8 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
       'Requester-Id': '1',
       'Requester-Role': 'Admin',
       'Requester-Name': Faker::Name.name,
+      'Requester-First-Name': Faker::Name.first_name,
+      'Requester-Last-Name': Faker::Name.last_name,
       'Requester-Datacenter': '1',
       'Requester-Datacenter-Name': 'test',
       'Requester-Authorized': '1',
@@ -52,6 +54,15 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
 
       it 'should create audit' do
         expect(Audit.count).to eq(1)
+        expect(Audit.last.attributes.with_indifferent_access).to include(
+                                           revision_id: Revision.last.id,
+                                           user_id: headers[:'Requester-Id'].to_i,
+                                           user_name: headers[:'Requester-Name'],
+                                           first_name: headers[:'Requester-First-Name'],
+                                           last_name: headers[:'Requester-Last-Name'],
+                                           user_type: headers[:'Requester-Role'],
+                                           action: 'create'
+                                         )
       end
 
       it 'report_type is original once created' do

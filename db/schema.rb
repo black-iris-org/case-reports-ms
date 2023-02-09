@@ -49,6 +49,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_08_163131) do
     t.string "user_type"
     t.integer "action", limit: 2
     t.datetime "action_at", default: -> { "CURRENT_TIMESTAMP" }
+    t.string "first_name"
+    t.string "last_name"
     t.index ["revision_id"], name: "index_audits_on_revision_id"
   end
 

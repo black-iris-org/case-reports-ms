@@ -9,6 +9,8 @@ module AuditsConcern
         revision_id: @revision_id,
         user_id: requester_id,
         user_name: requester_name,
+        first_name: requester_first_name,
+        last_name: requester_last_name,
         user_type: requester_role,
         action: action
       )
