@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_02_08_163131) do
+ActiveRecord::Schema[7.0].define(version: 2023_02_08_173955) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -60,7 +60,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_08_163131) do
     t.integer "datacenter_id", null: false
     t.integer "incident_id", null: false
     t.string "datacenter_name", default: "", null: false
-    t.index ["incident_id"], name: "index_case_reports_on_incident_id"
   end
 
   create_table "revisions", force: :cascade do |t|
