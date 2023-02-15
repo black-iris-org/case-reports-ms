@@ -77,4 +77,6 @@ Thumbs.db
 /config/master.key
 
 .env
+.env.*
+!.env.sample
 

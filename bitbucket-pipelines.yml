@@ -1,19 +1,41 @@
-#  Template Ruby build
+image: atlassian/default-image:3
 
-#  This template allows you to validate your Ruby code.
-#  The workflow allows running tests and code linting on the default branch.
-
-image: ruby:2.7
+options:
+  docker: true
 
 pipelines:
-  default:
-    - parallel:
+  branches:
+    develop:
       - step:
-          name: Test
+          name: "Build docker image"
           script:
-            - bundle install
-            - bundle exec rake
+            - export DOCKER_BUILDKIT=1
+            - IMAGE_NAME=docker.io/$DOCKER_USERNAME/$DOCKER_IMAGE_NAME:${BITBUCKET_BRANCH//\//_}
+            - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+            - docker build -t $IMAGE_NAME .
+            - docker push $IMAGE_NAME
+          caches:
+            - docker
+
       - step:
-          name: Lint code
+          name: Deploy to staging
+          deployment: staging
+          caches:
+            - docker
           script:
-            - ruby -wc **/*.rb
+            - echo "Deploying to staging server..."
+            - TAG_NAME=${BITBUCKET_BRANCH//\//_}
+            - |
+              REMOTE_COMMANDS=$(cat <<EOF
+                mkdir -p case-reports-ms && cd case-reports-ms
+                echo "$(cat .docker/docker-compose.pipeline.yml | base64)" | base64 --decode > docker-compose.yml
+                echo "$STAGING_ENV_FILE" | base64 --decode > .env
+                echo "sudo TAG=$TAG_NAME docker-compose up -d" > up.sh
+                echo "sudo TAG=$TAG_NAME docker-compose down" > down.sh
+                sudo chmod +x up.sh down.sh
+                sudo ./up.sh
+              EOF
+              )
+            - echo "$STAGING_BITBUCKET_SSH_KEY" | base64 --decode >> key.pem
+            - chmod 400 key.pem
+            - ssh -o "StrictHostKeyChecking=no" -i "key.pem" $STAGING_SSH_USER@$STAGING_SERVER_IP "$REMOTE_COMMANDS"
