@@ -3,13 +3,33 @@ require 'rails_helper'
 RSpec.describe Api::V1::CaseReportsController, type: :request do
   include JsonResponse
 
-  let(:case_report_1)    { FactoryBot.create(:case_report) }
-  let(:case_report_2)    { FactoryBot.create(:case_report) }
-  let(:case_report_3)    { FactoryBot.create(:case_report, incident_id: '2') }
-  let(:revision_1)       { case_report_1.reload.revision }
-  let(:revision_2)       { case_report_2.reload.revision }
-  let(:valid_attributes) { { incident_number: 1, incident_id: 1, datacenter_id: 1, datacenter_name: 'test', incident_at: Time.now,
+  let(:case_report_1)      { FactoryBot.create(:case_report) }
+  let(:case_report_2)      { FactoryBot.create(:case_report) }
+  let(:case_report_3)      { FactoryBot.create(:case_report, incident_id: '2') }
+  let(:revision_1)         { case_report_1.reload.revision }
+  let(:revision_2)         { case_report_2.reload.revision }
+  let(:valid_attributes)   { { incident_number: 1, incident_id: 1, datacenter_id: 1, datacenter_name: 'test', incident_at: Time.now,
                              report_type: :amended, user_id: 1, responder_name: 'test', name: 'test' } }
+  let(:valid_attributes_2) { { incident_number: 1, incident_id: 1, datacenter_id: 1, incident_at: Time.now,
+                               report_type:     :amended, user_id: 1, responder_name: 'test', name: 'test 2' } }
+
+  let(:attachment_attributes_1) do
+    {
+      filename:     "test-file-1",
+      checksum:     "XYFa0qq+ose3hxY01oMYbw==",
+      byte_size:    30954,
+      content_type: "application/pdf"
+    }
+  end
+
+  let(:attachment_attributes_2) do
+    {
+      filename:     "test-file-2",
+      checksum:     "MEI4ODU3RTA=",
+      byte_size:    15931,
+      content_type: "application/jpg"
+    }
+  end
 
   let(:headers) do
     {
@@ -64,8 +84,38 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
                                          )
       end
 
-      it 'report_type is original once created' do
+      it 'should return original as report_type' do
         expect(json_response[:case_report]['report_type']).to eq('original')
+      end
+    end
+
+    context 'attachments' do
+      let(:params) do
+        { case_report: valid_attributes.merge(files_attributes: [attachment_attributes]) }
+      end
+
+      let(:report) { CaseReport.find(json_response.dig('case_report', 'id')) }
+      let(:revision) { report.reload.revision }
+
+      before do
+        post "/api/v1/case_reports", params: params, headers: headers
+      end
+
+      context 'should create valid attachment' do
+        it('should be present') { expect(revision.files).to be_present }
+        it 'should match the initial attributes' do
+          expect(revision.files_blobs.first.attributes.with_indifferent_access)
+            .to include(
+                  filename:     "test-file",
+                  checksum:     "XYFa0qq+ose3hxY01oMYbw==",
+                  byte_size:    30954,
+                  content_type: "application/pdf"
+                )
+        end
+      end
+
+      it 'should return list of URLs for direct upload to S3' do
+        expect(json_response.dig('case_report', 'revision', 'direct_upload_urls')).to be_present
       end
     end
   end
@@ -122,6 +172,49 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
 
       it 'should return user_id and  Requester-Id are the same' do
         expect(json_response[:case_report][:revision][:user_id]).to eq(1)
+      end
+    end
+
+    context 'attachments' do
+      let!(:report) { FactoryBot.create(:case_report, with_sample_attachment: true) }
+      let(:revision) { report.reload.revision }
+
+      before { put "/api/v1/case_reports/#{report.id}", params: params, headers: headers }
+
+      context 'resetting attachments' do
+        let(:params) { { case_report: valid_attributes_2.merge(files_attributes: [attachment_attributes_1]) } }
+
+        it 'should reset files attachments' do
+          expect(revision.files_blobs.pluck(:filename)).to eq([attachment_attributes_1[:filename]])
+        end
+
+        it 'should return list of URLs for direct upload to S3' do
+          expect(json_response.dig('case_report', 'revision', 'direct_upload_urls')).to be_present
+        end
+      end
+
+      context 'adding attachments' do
+        let(:params) { { case_report: valid_attributes_2.merge(add_files_attributes: [attachment_attributes_1]) } }
+
+        it 'should add new attachment to the new revision' do
+          expect(revision.files_blobs.pluck(:filename)).to eq(['test-sample', attachment_attributes_1[:filename]])
+        end
+
+        it 'should return list of URLs for direct upload to S3' do
+          expect(json_response.dig('case_report', 'revision', 'direct_upload_urls')).to be_present
+        end
+      end
+
+      context 'removing attachments' do
+        let(:params) { { case_report: valid_attributes_2.merge(remove_files_attributes: ['test-sample']) } }
+
+        it 'should add new attachment to the new revision' do
+          expect(revision.files_blobs.pluck(:filename)).to eq([])
+        end
+
+        it 'should return list of URLs for direct upload to S3' do
+          expect(json_response.dig('case_report', 'revision', 'direct_upload_urls')).to eq([])
+        end
       end
     end
   end

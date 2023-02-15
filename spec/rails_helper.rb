@@ -62,6 +62,9 @@ RSpec.configure do |config|
   # config.filter_gems_from_backtrace("gem name")
 
   config.include JsonResponse, type: :request
+
+  # Stubbing S3 on activestorage
+  config.before { Aws.config.update(stub_responses: true) }
 end
 
 Shoulda::Matchers.configure do |config|
