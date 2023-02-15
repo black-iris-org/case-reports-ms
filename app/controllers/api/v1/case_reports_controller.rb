@@ -9,7 +9,8 @@ class Api::V1::CaseReportsController < ApplicationController
   after_action :add_audit_record, only: [:create, :show, :update], unless: :skip_audit?
 
   def index
-    render json: CaseReportSerializer.render(paginate(@case_reports), root: :case_reports, meta: pagination_status)
+    render json: CaseReportSerializer.render(paginate(@case_reports), root: :case_reports, meta: pagination_status,
+                                             view: :with_revisions)
   end
 
   def create
