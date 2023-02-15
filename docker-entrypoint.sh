@@ -2,11 +2,28 @@
 
 set -e
 
-# belongs to the attempt of creating truffleruby image but it was too slow
-#source /etc/profile.d/rvm.sh
+start () {
+  bundle exec rails s -b 0.0.0.0
+}
 
-if [ -f tmp/pids/server.pid ]; then
-  rm tmp/pids/server.pid
-fi
+migrate () {
+  bundle exec rails migrate
+}
 
-bundle exec rails s -b 0.0.0.0
+others () {
+  # Execute the custom command
+  "$@"
+}
+
+# Determine which entrypoint to run based on the first argument
+case "$1" in
+  start)
+    start
+    ;;
+  migrate)
+    migrate
+    ;;
+  *)
+    others "$@"
+    ;;
+esac
