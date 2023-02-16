@@ -9,6 +9,15 @@ class CaseReportSerializer < ApplicationSerializer
     exclude :revision
   end
 
+  view :without_health_data do
+    association :revisions, view: :without_health_data, blueprint: RevisionSerializer do |case_report, options|
+      options[:custom_revision_list] || case_report.revisions
+    end
+    association :revision, view: :without_health_data, blueprint: RevisionSerializer do |case_report, options|
+      options[:custom_revision_list] || case_report.revision
+    end
+  end
+
   view :with_revisions do
     include_view :without_revision
     association :revisions, view: :without_health_data, blueprint: RevisionSerializer do |case_report, options|

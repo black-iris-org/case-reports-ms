@@ -10,7 +10,7 @@ class Api::V1::CaseReportsController < ApplicationController
 
   def index
     render json: CaseReportSerializer.render(paginate(@case_reports), root: :case_reports, meta: pagination_status,
-                                             view: :with_revisions)
+                                             view: :without_health_data)
   end
 
   def create
