@@ -12,6 +12,6 @@ class RevisionSerializer < ApplicationSerializer
   end
 
   view :without_health_data do
-    excludes :content, :attachments, :patient_dob, :patient_name
+    excludes :content, :attachments
   end
 end
