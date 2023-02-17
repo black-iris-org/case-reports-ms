@@ -27,6 +27,7 @@ pipelines:
             - |
               REMOTE_COMMANDS=$(cat <<EOF
                 mkdir -p case-reports-ms && cd case-reports-ms
+                sudo ./down.sh || true
                 echo "$(cat .docker/docker-compose.pipeline.yml | base64)" | base64 --decode > docker-compose.yml
                 echo "$STAGING_ENV_FILE" | base64 --decode > .env
                 cat << EOF > up.sh
