@@ -31,11 +31,9 @@ pipelines:
                 echo "$STAGING_ENV_FILE" | base64 --decode > .env
                 cat << EOF > up.sh
                 sudo TAG=develop docker-compose pull
-                sudo TAG=develop docker-compose up -d
-                EOF  
+                sudo TAG=develop docker-compose up -d  
                 echo "sudo TAG=develop docker-compose down" > down.sh
                 sudo chmod +x up.sh down.sh
-                sudo ./up.sh
               EOF
               )
             - echo "$STAGING_BITBUCKET_SSH_KEY" | base64 --decode >> key.pem
