@@ -24,17 +24,16 @@ pipelines:
             - docker
           script:
             - echo "Deploying to staging server..."
-            - TAG_NAME=${BITBUCKET_BRANCH//\//_}
             - |
               REMOTE_COMMANDS=$(cat <<EOF
                 mkdir -p case-reports-ms && cd case-reports-ms
                 echo "$(cat .docker/docker-compose.pipeline.yml | base64)" | base64 --decode > docker-compose.yml
                 echo "$STAGING_ENV_FILE" | base64 --decode > .env
                 cat << EOF > up.sh
-                sudo TAG=$TAG_NAME docker-compose pull
-                sudo TAG=$TAG_NAME docker-compose up -d
+                sudo TAG=develop docker-compose pull
+                sudo TAG=develop docker-compose up -d
                 EOF  
-                echo "sudo TAG=$TAG_NAME docker-compose down" > down.sh
+                echo "sudo TAG=develop docker-compose down" > down.sh
                 sudo chmod +x up.sh down.sh
                 sudo ./up.sh
               EOF
