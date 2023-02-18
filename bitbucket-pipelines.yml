@@ -34,7 +34,7 @@ pipelines:
             cat <<UP_COMMAND > up.sh
             sudo TAG=${TAG_NAME} docker-compose pull
             sudo TAG=${TAG_NAME} docker-compose up -d
-            UP_COMMANDz
+            UP_COMMAND
             echo "sudo TAG=${TAG_NAME} docker-compose down" > down.sh
             sudo chmod +x up.sh down.sh
             sudo ./up.sh
@@ -44,6 +44,3 @@ pipelines:
           - echo "$STAGING_BITBUCKET_SSH_KEY" | base64 --decode >> key.pem
           - chmod 400 key.pem
           - ssh -o "StrictHostKeyChecking=no" -i "key.pem" $STAGING_SSH_USER@$STAGING_SERVER_IP "$REMOTE_COMMANDS"
-          - echo "$?"
-          - wait
-          - echo "$?"
