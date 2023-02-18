@@ -31,8 +31,8 @@ pipelines:
               echo "$(cat .docker/docker-compose.pipeline.yml | base64)" | base64 --decode > docker-compose.yml
               echo "$STAGING_ENV_FILE" | base64 --decode > .env
               cat << EOF > up.sh
-                sudo TAG=${TAG_NAME} docker-compose pull
-                sudo TAG=${TAG_NAME} docker-compose up -d  
+              sudo TAG=${TAG_NAME} docker-compose pull
+              sudo TAG=${TAG_NAME} docker-compose up -d  
               EOF
               echo "sudo TAG=${TAG_NAME} docker-compose down" > down.sh
               sudo chmod +x up.sh down.sh
