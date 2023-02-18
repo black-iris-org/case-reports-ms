@@ -4,42 +4,41 @@ options:
   docker: true
 
 pipelines:
-  branches:
-    develop:
-      - step:
-          name: "Build docker image"
-          script:
-            - export DOCKER_BUILDKIT=1
-            - IMAGE_NAME=docker.io/$DOCKER_USERNAME/$DOCKER_IMAGE_NAME:${BITBUCKET_BRANCH//\//_}
-            - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-            - docker build -t $IMAGE_NAME .
-            - docker push $IMAGE_NAME
-          caches:
-            - docker
+  default:
+    - step:
+        name: "Build docker image"
+        script:
+          - export DOCKER_BUILDKIT=1
+          - IMAGE_NAME=docker.io/$DOCKER_USERNAME/$DOCKER_IMAGE_NAME:${BITBUCKET_BRANCH//\//_}
+          - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+          - docker build -t $IMAGE_NAME .
+          - docker push $IMAGE_NAME
+        caches:
+          - docker
 
-      - step:
-          name: Deploy to staging
-          deployment: staging
-          caches:
-            - docker
-          script:
-            - echo "Deploying to staging server..."
-            - TAG_NAME=${BITBUCKET_BRANCH//\//_}
-            - echo $TAG_NAME
-            - |
-              REMOTE_COMMANDS=$(cat <<EOF
-                mkdir -p case-reports-ms && cd case-reports-ms
-                echo "$(cat .docker/docker-compose.pipeline.yml | base64)" | base64 --decode > docker-compose.yml
-                echo "$STAGING_ENV_FILE" | base64 --decode > .env
-                cat << EOF > up.sh
-                  sudo TAG=${TAG_NAME} docker-compose pull
-                  sudo TAG=${TAG_NAME} docker-compose up -d  
-                EOF
-                echo "sudo TAG=${TAG_NAME} docker-compose down" > down.sh
-                sudo chmod +x up.sh down.sh
-                sudo ./up.sh
-              )
-            - echo $REMOTE_COMMANDS
-            - echo "$STAGING_BITBUCKET_SSH_KEY" | base64 --decode >> key.pem
-            - chmod 400 key.pem
-            - ssh -o "StrictHostKeyChecking=no" -i "key.pem" $STAGING_SSH_USER@$STAGING_SERVER_IP "$REMOTE_COMMANDS"
+    - step:
+        name: Deploy to staging
+        deployment: staging
+        caches:
+          - docker
+        script:
+          - echo "Deploying to staging server..."
+          - TAG_NAME=${BITBUCKET_BRANCH//\//_}
+          - echo $TAG_NAME
+          - |
+            REMOTE_COMMANDS=$(cat <<EOF
+              mkdir -p case-reports-ms && cd case-reports-ms
+              echo "$(cat .docker/docker-compose.pipeline.yml | base64)" | base64 --decode > docker-compose.yml
+              echo "$STAGING_ENV_FILE" | base64 --decode > .env
+              cat << EOF > up.sh
+                sudo TAG=${TAG_NAME} docker-compose pull
+                sudo TAG=${TAG_NAME} docker-compose up -d  
+              EOF
+              echo "sudo TAG=${TAG_NAME} docker-compose down" > down.sh
+              sudo chmod +x up.sh down.sh
+              sudo ./up.sh
+            )
+          - echo $REMOTE_COMMANDS
+          - echo "$STAGING_BITBUCKET_SSH_KEY" | base64 --decode >> key.pem
+          - chmod 400 key.pem
+          - ssh -o "StrictHostKeyChecking=no" -i "key.pem" $STAGING_SSH_USER@$STAGING_SERVER_IP "$REMOTE_COMMANDS"
