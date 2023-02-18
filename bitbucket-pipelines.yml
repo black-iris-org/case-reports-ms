@@ -27,16 +27,16 @@ pipelines:
           - echo $TAG_NAME
           - |
             REMOTE_COMMANDS=$(cat <<EOF
-              mkdir -p case-reports-ms && cd case-reports-ms
-              echo "$(cat .docker/docker-compose.pipeline.yml | base64)" | base64 --decode > docker-compose.yml
-              echo "$STAGING_ENV_FILE" | base64 --decode > .env
-              cat <<UP_COMMAND > up.sh
-              sudo TAG=${TAG_NAME} docker-compose pull
-              sudo TAG=${TAG_NAME} docker-compose up -d
-              UP_COMMAND
-              echo "sudo TAG=${TAG_NAME} docker-compose down" > down.sh
-              sudo chmod +x up.sh down.sh
-              sudo ./up.sh
+            mkdir -p case-reports-ms && cd case-reports-ms
+            echo "$(cat .docker/docker-compose.pipeline.yml | base64)" | base64 --decode > docker-compose.yml
+            echo "$STAGING_ENV_FILE" | base64 --decode > .env
+            cat <<UP_COMMAND > up.sh
+            sudo TAG=${TAG_NAME} docker-compose pull
+            sudo TAG=${TAG_NAME} docker-compose up -d
+            UP_COMMAND
+            echo "sudo TAG=${TAG_NAME} docker-compose down" > down.sh
+            sudo chmod +x up.sh down.sh
+            sudo ./up.sh
             EOF
             )
           - echo "$REMOTE_COMMANDS"
