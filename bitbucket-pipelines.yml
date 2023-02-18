@@ -27,6 +27,7 @@ pipelines:
           - echo $TAG_NAME
           - |
             REMOTE_COMMANDS=$(cat <<EOF
+            set -e
             tst
             mkdir -p case-reports-ms && cd case-reports-ms
             echo "$(cat .docker/docker-compose.pipeline.yml | base64)" | base64 --decode > docker-compose.yml
@@ -44,5 +45,6 @@ pipelines:
           - echo "$STAGING_BITBUCKET_SSH_KEY" | base64 --decode >> key.pem
           - chmod 400 key.pem
           - ssh -o "StrictHostKeyChecking=no" -i "key.pem" $STAGING_SSH_USER@$STAGING_SERVER_IP "$REMOTE_COMMANDS"
+          - echo $?
           - wait
           - echo $?
