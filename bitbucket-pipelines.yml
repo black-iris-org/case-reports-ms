@@ -39,7 +39,7 @@ pipelines:
               sudo ./up.sh
             EOF
             )
-          - echo $REMOTE_COMMANDS
+          - echo "$REMOTE_COMMANDS"
           - echo "$STAGING_BITBUCKET_SSH_KEY" | base64 --decode >> key.pem
           - chmod 400 key.pem
           - ssh -o "StrictHostKeyChecking=no" -i "key.pem" $STAGING_SSH_USER@$STAGING_SERVER_IP "$REMOTE_COMMANDS"
