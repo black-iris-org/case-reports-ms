@@ -6,6 +6,7 @@ class Revision < ApplicationRecord
   has_many :audits
 
   has_one :creation_audit, -> { where(action: :create) }, class_name: 'Audit'
+  has_one :update_audit, -> { where(action: :update) }, class_name: 'Audit'
 
   validates_presence_of :user_id, :responder_name, :name
 
@@ -35,6 +36,6 @@ class Revision < ApplicationRecord
   end
 
   def created_at
-    creation_audit&.action_at
+    creation_audit&.action_at || update_audit&.action_at
   end
 end
