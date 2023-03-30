@@ -15,7 +15,7 @@ module RequesterConcern
     }
 
     def validate_requester_headers
-      return unless REQUESTER_HEADERS.keys.map { |key| send(key) }.any?(&:blank?)
+      return unless REQUESTER_HEADERS.keys.map { |key| send(key) }.any?(&:nil?)
       head :unauthorized
     end
 
