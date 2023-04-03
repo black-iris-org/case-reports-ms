@@ -6,6 +6,10 @@ start () {
   bundle exec rails s -b 0.0.0.0
 }
 
+spec () {
+  bundle exec rspec
+}
+
 migrate () {
   bundle exec rails migrate
 }
@@ -19,6 +23,9 @@ others () {
 case "$1" in
   start)
     start
+    ;;
+  spec)
+    spec
     ;;
   migrate)
     migrate

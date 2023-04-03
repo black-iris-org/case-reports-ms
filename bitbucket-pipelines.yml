@@ -1,46 +1,131 @@
-image: atlassian/default-image:3
-
 options:
   docker: true
 
+definitions:
+  services:
+    postgres:
+      image: postgres:15.1-alpine
+      environment:
+        POSTGRES_USER: db
+        POSTGRES_DB: db
+        POSTGRES_PASSWORD: secret
+  steps:
+    - step: &prepare_variables
+        id: prepare_variables
+        name: Prepare Variables
+        image: alpine:3.14
+        clone:
+          enabled: false
+        script:
+          - set -e
+          - IMAGE_NAME=docker.io/$DOCKER_USERNAME/$DOCKER_IMAGE_NAME
+          - IMAGE_TAG=${BITBUCKET_BRANCH//\//_}
+          - echo "IMAGE_NAME=$IMAGE_NAME" >> variables.txt
+          - echo "IMAGE_TAG=$IMAGE_TAG" >> variables.txt
+        artifacts:
+          - variables.txt
+
+    - step: &build_docker_image
+        id: build_docker_image
+        name: Build Docker Image
+        script:
+          - set -e
+          - source variables.txt
+          - export DOCKER_BUILDKIT=1
+          - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+          - |
+            docker build \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            --cache-from $IMAGE_NAME:staging \
+            -t $IMAGE_NAME:$IMAGE_TAG .
+          - docker save --output image.docker $IMAGE_NAME:$IMAGE_TAG
+        caches:
+          - docker
+        depends_on:
+          - prepare_variables
+        artifacts:
+          - image.docker
+
+    - step: &test
+        id: test
+        name: Test
+        clone:
+          enabled: false
+        script:
+          - set -e
+          - source variables.txt
+          - docker load --input ./image.docker
+          - |
+            cat <<ENV > .env
+            RAILS_ENV=test
+            PGDATABASE=db
+            PGUSER=db
+            PGPASSWORD=secret
+            PGHOST=host.docker.internal
+            ENV
+          - |
+            docker run --env-file=.env \
+                       --add-host host.docker.internal:$BITBUCKET_DOCKER_HOST_INTERNAL \
+                       --rm $IMAGE_NAME:$IMAGE_TAG \
+                       bash -c "rails db:create db:migrate && bundle exec rspec"
+        caches:
+          - docker
+        services:
+          - postgres
+        depends_on:
+          - build_docker_image
+    - step: &push_image
+        id: push_image
+        name: Push Image
+        clone:
+          enabled: false
+        script:
+          - source variables.txt
+          - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+          - docker load --input ./image.docker
+          - docker push $IMAGE_NAME:$IMAGE_TAG
+        caches:
+          - docker
+
 pipelines:
+  pull-requests:
+    '**':
+      - step: *prepare_variables
+      - step: *build_docker_image
+      - step: *test
+
   branches:
     develop:
-      - step:
-          name: "Build docker image"
-          script:
-            - export DOCKER_BUILDKIT=1
-            - IMAGE_NAME=docker.io/$DOCKER_USERNAME/$DOCKER_IMAGE_NAME:${BITBUCKET_BRANCH//\//_}
-            - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-            - docker build -t $IMAGE_NAME .
-            - docker push $IMAGE_NAME
-          caches:
-            - docker
-
+      - step: *prepare_variables
+      - step: *build_docker_image
+      - step: *test
+      - step: *push_image
       - step:
           name: Deploy to staging
-          deployment: staging
+          deployment: Staging
           caches:
             - docker
+          depends_on:
+            - prepare_variables
+            - build_docker_image
+            - test
           script:
-            - echo "Deploying to staging server..."
-            - TAG_NAME=${BITBUCKET_BRANCH//\//_}
+            - set -e
+            - source variables.txt
             - |
               REMOTE_COMMANDS=$(cat <<SCRIPT
               set -e
               mkdir -p case-reports-ms && cd case-reports-ms
               echo "$(cat .docker/docker-compose.pipeline.yml | base64)" | base64 --decode > docker-compose.yml
-              echo "$STAGING_ENV_FILE" | base64 --decode > .env
+              echo "$ENV_FILE" | base64 --decode > .env
               cat <<UP_COMMAND > up.sh
-              sudo TAG=${TAG_NAME} docker-compose pull
-              sudo TAG=${TAG_NAME} docker-compose up -d
+              sudo TAG=${IMAGE_TAG} docker-compose pull
+              sudo TAG=${IMAGE_TAG} docker-compose up -d
               UP_COMMAND
-              echo "sudo TAG=${TAG_NAME} docker-compose down" > down.sh
+              echo "sudo TAG=${IMAGE_TAG} docker-compose down" > down.sh
               sudo chmod +x up.sh down.sh
               sudo ./up.sh
               SCRIPT
               )
-            - echo "$STAGING_BITBUCKET_SSH_KEY" | base64 --decode >> key.pem
-            - chmod 400 key.pem
-            - ssh -o "StrictHostKeyChecking=no" -i "key.pem" $STAGING_SSH_USER@$STAGING_SERVER_IP "$REMOTE_COMMANDS"
+            - ssh -o "StrictHostKeyChecking=no" -i $BITBUCKET_SSH_KEY_FILE $SSH_USER@$SERVER_IP "$REMOTE_COMMANDS"
             - wait
