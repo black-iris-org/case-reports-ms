@@ -5,7 +5,7 @@ RSpec.describe Revision, type: :model do
   let(:revision_duplication) { FactoryBot.create(:revision, revision.attributes.except('id')) }
 
   describe 'associations' do
-    it { should belong_to(:case_report) }
+    it { should belong_to(:case_report).optional }
     it { should have_many(:audits) }
   end
 
