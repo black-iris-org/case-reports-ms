@@ -9,6 +9,12 @@ definitions:
         POSTGRES_USER: db
         POSTGRES_DB: db
         POSTGRES_PASSWORD: secret
+    minio:
+      image: satantime/minio-server
+      environment:
+        MINIO_ROOT_USER: access_key
+        MINIO_ROOT_PASSWORD: secret_key
+
   steps:
     - step: &prepare_variables
         id: prepare_variables
@@ -49,6 +55,7 @@ definitions:
     - step: &test
         id: test
         name: Test
+        deployment: Test
         clone:
           enabled: false
         script:
@@ -62,16 +69,28 @@ definitions:
             PGUSER=db
             PGPASSWORD=secret
             PGHOST=host.docker.internal
+            DB_USER=db
+            DB_HOST=host.docker.internal
+            DB_PORT=5432
+            DB_PASSWORD=secret
+            AWS_ACCESS_KEY_ID=access_key
+            AWS_SECRET_ACCESS_KEY=secret_key
+            AWS_DEFAULT_REGION=us-east-1
+            AWS_BUCKET_NAME=beacon-uploads-staging
+            AWS_BUCKET=beacon-uploads-staging
+            AWS_REGION=us-east-1
+            S3_ENDPOINT=http://host.docker.internal:9000
             ENV
           - |
             docker run --env-file=.env \
                        --add-host host.docker.internal:$BITBUCKET_DOCKER_HOST_INTERNAL \
                        --rm $IMAGE_NAME:$IMAGE_TAG \
-                       bash -c "rails db:create db:migrate && bundle exec rspec"
+                       bash -c "rails db:create db:schema:load && bundle exec rspec"
         caches:
           - docker
         services:
           - postgres
+          - minio
         depends_on:
           - build_docker_image
     - step: &push_image
