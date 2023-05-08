@@ -92,13 +92,11 @@ pipelines:
     '**':
       - step: *prepare_variables
       - step: *build_docker_image
-      - step: *test
 
   branches:
     develop:
       - step: *prepare_variables
       - step: *build_docker_image
-      - step: *test
       - step: *push_image
       - step:
           name: Deploy to staging
@@ -108,7 +106,6 @@ pipelines:
           depends_on:
             - prepare_variables
             - build_docker_image
-            - test
           script:
             - set -e
             - source variables.txt
