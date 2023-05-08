@@ -15,7 +15,7 @@ class Api::V1::RevisionsController < ApplicationController
       render json: CaseReportSerializer.render(
         @case_report,
         root: :case_report,
-        view: :with_revisions,
+        view: option_params[:view]&.to_sym || :with_revisions,
         custom_revision_list: paginate(@case_report.revisions),
         meta: pagination_status
       )
@@ -68,5 +68,9 @@ class Api::V1::RevisionsController < ApplicationController
     return unless params[:user_id].present?
 
     @revisions = @revisions.where(user_id: params[:user_id])
+  end
+
+  def option_params
+    params.permit(:view).allow(view: %w[full_details])
   end
 end
