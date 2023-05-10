@@ -17,6 +17,7 @@ RSpec.describe Api::V1::RevisionsController, type: :request do
       'Requester-First-Name': Faker::Name.first_name,
       'Requester-Last-Name': Faker::Name.last_name,
       'Requester-Datacenter': '1',
+      'Requester-Datacenter-Name': 'test'
     }
   end
 
@@ -77,22 +78,14 @@ RSpec.describe Api::V1::RevisionsController, type: :request do
                                                                                                    user_id: 1,
                                                                                                    name: 'test',
                                                                                                    case_report_id: case_report_1.id,
-                                                                                                   attachments: [],
-                                                                                                   incident_address: {},
-                                                                                                   content: {},
-                                                                                                   patient_dob: nil,
-                                                                                                   patient_name: nil)
+                                                                                                   incident_address: {})
 
           expect(json_response[:case_report][:revisions].last.with_indifferent_access).to include(id: revision_2.id,
                                                                                                   responder_name: 'test_2',
                                                                                                   user_id: 1,
                                                                                                   name: 'test',
                                                                                                   case_report_id: case_report_1.id,
-                                                                                                  attachments: [],
-                                                                                                  incident_address: {},
-                                                                                                  content: {},
-                                                                                                  patient_dob: nil,
-                                                                                                  patient_name: nil)
+                                                                                                  incident_address: {})
         end
       end
 

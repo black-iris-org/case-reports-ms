@@ -91,7 +91,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
 
     context 'attachments' do
       let(:params) do
-        { case_report: valid_attributes.merge(files_attributes: [attachment_attributes]) }
+        { case_report: valid_attributes.merge(files_attributes: [attachment_attributes_2]) }
       end
 
       let(:report) { CaseReport.find(json_response.dig('case_report', 'id')) }
@@ -106,10 +106,10 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
         it 'should match the initial attributes' do
           expect(revision.files_blobs.first.attributes.with_indifferent_access)
             .to include(
-                  filename:     "test-file",
-                  checksum:     "XYFa0qq+ose3hxY01oMYbw==",
-                  byte_size:    30954,
-                  content_type: "application/pdf"
+                  filename:     "test-file-2",
+                  checksum:     "MEI4ODU3RTA=",
+                  byte_size:    15931,
+                  content_type: "application/jpg"
                 )
         end
       end
@@ -295,15 +295,11 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
                                                                                       report_type: 'original',
                                                                                       revisions_count: 1)
 
-        expect(json_response[:case_reports].first[:revision].with_indifferent_access).to include(responder_name: revision_2.responder_name,
-                                                                                                 user_id: revision_2.user_id,
-                                                                                                 name: revision_2.name,
-                                                                                                 case_report_id: case_report_2.id,
-                                                                                                 attachments: [],
-                                                                                                 incident_address: {},
-                                                                                                 content: {},
-                                                                                                 patient_dob: nil,
-                                                                                                 patient_name: nil)
+        expect(json_response[:case_reports].first[:revision].with_indifferent_access).to include(responder_name:   revision_2.responder_name,
+                                                                                                 user_id:          revision_2.user_id,
+                                                                                                 name:             revision_2.name,
+                                                                                                 case_report_id:   case_report_2.id,
+                                                                                                 incident_address: {})
       end
 
       it 'case_report_1' do
@@ -320,11 +316,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
                                                                                                 user_id: revision_1.user_id,
                                                                                                 name: revision_1.name,
                                                                                                 case_report_id: case_report_1.id,
-                                                                                                attachments: [],
-                                                                                                incident_address: {},
-                                                                                                content: {},
-                                                                                                patient_dob: nil,
-                                                                                                patient_name: nil)
+                                                                                                incident_address: {})
       end
     end
 
@@ -351,11 +343,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
                                                                                                  user_id: revision_2.user_id,
                                                                                                  name: revision_2.name,
                                                                                                  case_report_id: case_report_2.id,
-                                                                                                 attachments: [],
-                                                                                                 incident_address: {},
-                                                                                                 content: {},
-                                                                                                 patient_dob: nil,
-                                                                                                 patient_name: nil)
+                                                                                                 incident_address: {})
       end
 
       it 'case_report_1' do
@@ -371,11 +359,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
                                                                                                 user_id: revision_1.user_id,
                                                                                                 name: revision_1.name,
                                                                                                 case_report_id: case_report_1.id,
-                                                                                                attachments: [],
-                                                                                                incident_address: {},
-                                                                                                content: {},
-                                                                                                patient_dob: nil,
-                                                                                                patient_name: nil)
+                                                                                                incident_address: {})
       end
 
       it 'should return meta' do
