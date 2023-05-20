@@ -5,6 +5,7 @@ definitions:
   services:
     postgres:
       image: postgres:15.1-alpine
+      memory: 512
       environment:
         POSTGRES_USER: db
         POSTGRES_DB: db
@@ -93,6 +94,7 @@ definitions:
           - minio
         depends_on:
           - build_docker_image
+
     - step: &push_image
         id: push_image
         name: Push Image
@@ -105,6 +107,26 @@ definitions:
           - docker push $IMAGE_NAME:$IMAGE_TAG
         caches:
           - docker
+
+  deploy_commands: &deploy_commands |
+    set -e
+    source variables.txt
+    REMOTE_COMMANDS=$(cat <<SCRIPT
+    set -e
+    mkdir -p case-reports-ms && cd case-reports-ms
+    echo "$(cat .docker/docker-compose.pipeline.yml | base64)" | base64 --decode > docker-compose.yml
+    echo "$ENV_FILE" | base64 --decode > .env
+    cat <<UP_COMMAND > up.sh
+    sudo TAG=${IMAGE_TAG} docker compose pull
+    sudo TAG=${IMAGE_TAG} docker compose up -d
+    UP_COMMAND
+    echo "sudo TAG=${IMAGE_TAG} docker compose down" > down.sh
+    sudo chmod +x up.sh down.sh
+    sudo ./up.sh
+    SCRIPT
+    )
+    ssh -o "StrictHostKeyChecking=no" -i $BITBUCKET_SSH_KEY_FILE $SSH_USER@$SERVER_IP "$REMOTE_COMMANDS"
+    wait
 
 pipelines:
   pull-requests:
@@ -120,7 +142,7 @@ pipelines:
       - step: *test
       - step: *push_image
       - step:
-          name: Deploy to staging
+          name: Deployment to Staging
           deployment: Staging
           caches:
             - docker
@@ -129,22 +151,40 @@ pipelines:
             - build_docker_image
             - test
           script:
-            - set -e
-            - source variables.txt
-            - |
-              REMOTE_COMMANDS=$(cat <<SCRIPT
-              set -e
-              mkdir -p case-reports-ms && cd case-reports-ms
-              echo "$(cat .docker/docker-compose.pipeline.yml | base64)" | base64 --decode > docker-compose.yml
-              echo "$ENV_FILE" | base64 --decode > .env
-              cat <<UP_COMMAND > up.sh
-              sudo TAG=${IMAGE_TAG} docker-compose pull
-              sudo TAG=${IMAGE_TAG} docker-compose up -d
-              UP_COMMAND
-              echo "sudo TAG=${IMAGE_TAG} docker-compose down" > down.sh
-              sudo chmod +x up.sh down.sh
-              sudo ./up.sh
-              SCRIPT
-              )
-            - ssh -o "StrictHostKeyChecking=no" -i $BITBUCKET_SSH_KEY_FILE $SSH_USER@$SERVER_IP "$REMOTE_COMMANDS"
-            - wait
+            - echo "Deploying to $BITBUCKET_DEPLOYMENT_ENVIRONMENT server..."
+            - *deploy_commands
+
+    master:
+      - step: *prepare_variables
+      - step: *build_docker_image
+      - step: *test
+      - step: *push_image
+      - parallel:
+          steps:
+            - step:
+                name: Deploy to Paris
+                deployment: Production-Paris
+                trigger: manual
+                artifacts:
+                  - variables.txt
+                script:
+                  - echo "Deploying to $BITBUCKET_DEPLOYMENT_ENVIRONMENT server..."
+                  - *deploy_commands
+            - step:
+                name: Deploy to VA2
+                deployment: Production-VA2
+                trigger: manual
+                artifacts:
+                  - variables.txt
+                script:
+                  - echo "Deploying to $BITBUCKET_DEPLOYMENT_ENVIRONMENT server..."
+                  - *deploy_commands
+            - step:
+                name: Deploy to VA3
+                deployment: Production-VA3
+                trigger: manual
+                artifacts:
+                  - variables.txt
+                script:
+                  - echo "Deploying to $BITBUCKET_DEPLOYMENT_ENVIRONMENT server..."
+                  - *deploy_commands
