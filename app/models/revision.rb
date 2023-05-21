@@ -1,6 +1,6 @@
 class Revision < ApplicationRecord
-  include Revision::FilterConcern
-  include Revision::FilesConcern
+  include FilterConcern
+  include FilesConcern
 
   belongs_to :old_case_report, optional: true
   has_many :old_audits
