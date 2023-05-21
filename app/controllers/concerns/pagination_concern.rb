@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'pagy'
+require 'pagy/extras/array'
 
 module PaginationConcern
   extend ActiveSupport::Concern
@@ -8,7 +9,11 @@ module PaginationConcern
     include ::Pagy::Backend
 
     def paginate(relation)
-      @pagy, result = pagy(relation, pagination_params)
+      if relation.is_a?(Array)
+        @pagy, result = pagy_array(relation, pagination_params)
+      else
+        @pagy, result = pagy(relation, pagination_params)
+      end
       result
     end
 
