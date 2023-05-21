@@ -1,8 +1,8 @@
-class Audit < ApplicationRecord
-  include Audit::FilterConcern
+class OldAudit < ApplicationRecord
+  include FilterConcern
 
   belongs_to :revision
-  has_one :case_report, through: :revision
+  has_one :old_case_report, through: :revision
   delegate :incident_number, :incident_id, :datacenter_name, to: :case_report
   delegate :id, to: :revision
 

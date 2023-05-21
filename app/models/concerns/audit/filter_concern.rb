@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Audit::FilterConcern
+module OldAudit::FilterConcern
   extend ActiveSupport::Concern
   include Filterable
 

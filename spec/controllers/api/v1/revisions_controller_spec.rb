@@ -216,7 +216,7 @@ RSpec.describe Api::V1::RevisionsController, type: :request do
     context 'create audit once show revision' do
       it do
         get "/api/v1/revisions/#{revision_1.id}", params: { format: :json }, headers: headers
-        expect(Audit.count).to eq(2)
+        expect(OldAudit.count).to eq(2)
       end
     end
   end
