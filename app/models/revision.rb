@@ -2,11 +2,11 @@ class Revision < ApplicationRecord
   include Revision::FilterConcern
   include Revision::FilesConcern
 
-  belongs_to :case_report, optional: true
-  has_many :audits
+  belongs_to :old_case_report, optional: true
+  has_many :old_audits
 
-  has_one :creation_audit, -> { where(action: :create) }, class_name: 'Audit'
-  has_one :update_audit, -> { where(action: :update) }, class_name: 'Audit'
+  has_one :creation_audit, -> { where(action: :create) }, class_name: 'OldAudit'
+  has_one :update_audit, -> { where(action: :update) }, class_name: 'OldAudit'
 
   validates_presence_of :user_id, :responder_name, :name
 

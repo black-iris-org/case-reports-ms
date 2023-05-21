@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module CaseReport::FilterConcern
+module OldCaseReport::FilterConcern
   extend ActiveSupport::Concern
   include Filterable
 

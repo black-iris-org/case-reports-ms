@@ -1,4 +1,4 @@
-module CaseReport::RevisionSavingConcern
+module OldCaseReport::RevisionSavingConcern
   extend ActiveSupport::Concern
 
   included do

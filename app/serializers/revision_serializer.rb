@@ -8,7 +8,7 @@ class RevisionSerializer < ApplicationSerializer
 
   view :with_case_report do
     excludes :case_report_id
-    association :case_report, blueprint: CaseReportSerializer, view: :without_revision
+    association :case_report, blueprint: OldCaseReportSerializer, view: :without_revision
   end
 
   view :without_health_data do

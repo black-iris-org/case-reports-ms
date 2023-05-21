@@ -1,5 +1,5 @@
 FactoryBot.define do
-  factory :case_report do
+  factory :old_case_report do
     transient do
       with_sample_attachment { false }
       with_attachments do

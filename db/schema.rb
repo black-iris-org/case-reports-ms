@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_02_08_173955) do
+ActiveRecord::Schema[7.0].define(version: 2023_05_21_163552) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -42,7 +42,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_08_173955) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
-  create_table "audits", force: :cascade do |t|
+  create_table "old_audits", id: :bigint, default: -> { "nextval('audits_id_seq1'::regclass)" }, force: :cascade do |t|
     t.bigint "revision_id"
     t.integer "user_id"
     t.string "user_name"
@@ -54,7 +54,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_08_173955) do
     t.index ["revision_id"], name: "index_audits_on_revision_id"
   end
 
-  create_table "case_reports", force: :cascade do |t|
+  create_table "old_case_reports", force: :cascade do |t|
     t.integer "incident_number"
     t.datetime "incident_at", default: -> { "CURRENT_TIMESTAMP" }
     t.integer "datacenter_id", null: false
@@ -76,8 +76,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_08_173955) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "audits", "revisions"
-  add_foreign_key "revisions", "case_reports"
+  add_foreign_key "old_audits", "revisions"
+  add_foreign_key "revisions", "old_case_reports", column: "case_report_id"
 
   create_view "case_reports_view", sql_definition: <<-SQL
       WITH recent_revisions AS (
@@ -93,12 +93,12 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_08_173955) do
              FROM revisions
             GROUP BY revisions.case_report_id
           )
-   SELECT case_reports.id,
-      case_reports.incident_number,
-      case_reports.incident_id,
-      case_reports.incident_at,
-      case_reports.datacenter_id,
-      case_reports.datacenter_name,
+   SELECT old_case_reports.id,
+      old_case_reports.incident_number,
+      old_case_reports.incident_id,
+      old_case_reports.incident_at,
+      old_case_reports.datacenter_id,
+      old_case_reports.datacenter_name,
       recent_revisions.name,
       recent_revisions.id AS revision_id,
       recent_revisions.user_id,
@@ -107,8 +107,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_08_173955) do
               WHEN (counts.revisions_count = 1) THEN 0
               ELSE 1
           END AS report_type
-     FROM ((case_reports
-       JOIN recent_revisions ON ((case_reports.id = recent_revisions.case_report_id)))
-       JOIN counts ON ((case_reports.id = counts.case_report_id)));
+     FROM ((old_case_reports
+       JOIN recent_revisions ON ((old_case_reports.id = recent_revisions.case_report_id)))
+       JOIN counts ON ((old_case_reports.id = counts.case_report_id)));
   SQL
 end

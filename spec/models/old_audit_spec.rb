@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Audit, type: :model do
+RSpec.describe OldAudit, type: :model do
   describe 'associations' do
     it { should belong_to(:revision) }
     it { should have_one(:case_report).through(:revision) }
