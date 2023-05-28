@@ -6,23 +6,26 @@ class Api::V1::CaseReportsController < ApplicationController
   before_action :perform_authorization, only: [:index]
   before_action :set_case_reports, only: [:show, :update, :index]
   before_action :set_case_report, only: [:show, :update]
-  after_action :add_audit_record, only: [:create, :show, :update], unless: :skip_audit?
+  before_action :set_audit_additional_data, only: [:create, :show, :update], unless: :skip_audit?
 
   def index
-    render json: CaseReportSerializer.render(paginate(@case_reports), root: :case_reports, meta: pagination_status,
-                                             view: :without_health_data)
+    render json: CaseReportSerializer.render(
+      paginate(@case_reports),
+      root: :case_reports, meta: pagination_status,
+      view: :without_health_data
+    )
   end
 
   def create
-    @case_report = CaseReport.create!(create_params)
-    @revision_id = @case_report.revision_id
+    @case_report = CaseReport.create!(new_create_params)
+    # @revision_id = @case_report.revision_id
     render json: CaseReportSerializer.render(@case_report, root: :case_report, **serializer_options)
   end
 
   def update
-    @case_report.update!(update_params)
-    @revision_id = @case_report.revision_id
-    render json: CaseReportSerializer.render(@case_report.reload, root: :case_report, **serializer_options)
+    @case_report.update!(new_update_params)
+    # @revision_id = @case_report.revision_id
+    render json: CaseReportSerializer.render(@case_report, root: :case_report, **serializer_options)
   end
 
   def show
@@ -33,42 +36,59 @@ class Api::V1::CaseReportsController < ApplicationController
 
   def create_params
     params.require(:case_report).permit(:incident_number, :incident_at, :incident_id).merge(
-      datacenter_id: requester_datacenter,
-      datacenter_name: requester_datacenter_name,
+      datacenter_id:        requester_datacenter,
+      datacenter_name:      requester_datacenter_name,
       revisions_attributes: [revision_params]
     )
   end
 
+  def new_create_params
+    params.require(:case_report).permit(:incident_number, :incident_at, :incident_id).merge(
+      datacenter_id:   requester_datacenter,
+      datacenter_name: requester_datacenter_name,
+    ).merge params.require(:case_report).permit(*revision_attributes)
+                  .merge(user_id: requester_id, files_attributes: files_attributes)
+
+  end
+
   def update_params
     {
-      datacenter_id: requester_datacenter,
-      datacenter_name: requester_datacenter_name,
+      datacenter_id:        requester_datacenter,
+      datacenter_name:      requester_datacenter_name,
       revisions_attributes: [revision_params]
     }
   end
 
+  def new_update_params
+    {
+      datacenter_id:   requester_datacenter,
+      datacenter_name: requester_datacenter_name
+    }.merge(revision_params)
+  end
+
   def revision_attributes
-    attributes = (Revision::PRIMITIVE_COLUMNS.dup << Revision::JSONB_COLUMNS)
+    attributes = (CaseReport::PRIMITIVE_COLUMNS.dup << CaseReport::JSONB_COLUMNS)
     attributes << { files_attributes: files_attributes }
   end
 
   def files_params
     params.require(:case_report).permit(
-      files_attributes: [:filename, :checksum, :byte_size, :content_type],
-      add_files_attributes: [:filename, :checksum, :byte_size, :content_type],
+      files_attributes:        [:filename, :checksum, :byte_size, :content_type],
+      add_files_attributes:    [:filename, :checksum, :byte_size, :content_type],
       remove_files_attributes: [],
     )
   end
 
+  # This will prepare
   def files_attributes
     return files_params[:files_attributes] if files_params[:files_attributes].present?
 
-    files_attributes = @case_report&.revision&.files_blobs.to_a || []
+    files_attributes = @case_report&.audit&.report_attachment&.files_blobs.to_a || []
 
-    add_files_attributes = files_params[:add_files_attributes] || []
+    add_files_attributes    = files_params[:add_files_attributes] || []
     remove_files_attributes = files_params[:remove_files_attributes]
 
-    files_attributes += add_files_attributes if add_files_attributes.present?
+    files_attributes        += add_files_attributes if add_files_attributes.present?
 
     if remove_files_attributes.present?
       files_attributes.reject! { |file| remove_files_attributes.include? file[:filename] }
@@ -89,8 +109,12 @@ class Api::V1::CaseReportsController < ApplicationController
   end
 
   def set_case_report
-    @case_report = @case_reports.find(params[:id])
-    @revision_id = @case_report.revision_id
+    @case_report = if skip_audit?
+                     @case_reports.find(params[:id])
+                   else
+                     @case_reports.with_show_auditing { @case_reports.find(params[:id]) }
+                   end
+    # @revision_id = @case_report.revision_id
   end
 
   def set_case_reports
@@ -110,7 +134,7 @@ class Api::V1::CaseReportsController < ApplicationController
       if params[:incident_id].blank?
         render json: { error: 'Not authorized' }, status: :unauthorized and return
       else
-        @auth_params = {user_id: requester_id}
+        @auth_params = { user_id: requester_id }
       end
     end
   end

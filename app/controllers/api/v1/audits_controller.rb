@@ -9,18 +9,23 @@ class Api::V1::AuditsController < ApplicationController
   end
 
   def create
-    @audit = Audit.create!(audit_params)
+    ReportAudit.transaction do
+      # For some reason, it throws error if creating with user type
+      @audit = ReportAudit.create!(audit_params.except(:user_type))
+      @audit.update!(user_type: audit_params[:user_type]) if audit_params[:user_type].present?
+    end
+
     render json: AuditSerializer.render(@audit, root: :audit)
   end
 
   private
 
   def set_audits
-    @audits = Audit.eager_load(:case_report).filter_records(filtration_params).order(id: :desc)
+    @audits = ReportAudit.includes(:case_report).filter_records(filtration_params).order(id: :desc)
   end
 
   def audit_params
-    params.require(:audit).permit(:revision_id, :action, :action_at).merge(enforced_audit_params)
+    params.require(:audit).permit(:case_report_id, :action, :created_at).merge(enforced_audit_params)
   end
 
   def enforced_audit_params
