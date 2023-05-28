@@ -42,6 +42,49 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_21_163552) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "audits", force: :cascade do |t|
+    t.integer "auditable_id"
+    t.string "auditable_type"
+    t.integer "associated_id"
+    t.string "associated_type"
+    t.integer "user_id"
+    t.string "user_type"
+    t.string "username"
+    t.string "action"
+    t.jsonb "audited_changes"
+    t.integer "version", default: 0
+    t.string "comment"
+    t.string "remote_address"
+    t.string "request_uuid"
+    t.datetime "created_at"
+    t.jsonb "additional_data"
+    t.index ["associated_type", "associated_id"], name: "associated_index"
+    t.index ["auditable_type", "auditable_id", "version"], name: "auditable_index"
+    t.index ["created_at"], name: "index_audits_on_created_at"
+    t.index ["request_uuid"], name: "index_audits_on_request_uuid"
+    t.index ["user_id", "user_type"], name: "user_index"
+  end
+
+  create_table "case_reports", id: :bigint, default: -> { "nextval('new_case_reports_id_seq'::regclass)" }, force: :cascade do |t|
+    t.string "name"
+    t.string "first_name"
+    t.string "last_name"
+    t.string "responder_name"
+    t.string "patient_name"
+    t.string "datacenter_name", default: "", null: false
+    t.integer "report_type", limit: 2
+    t.integer "incident_number"
+    t.integer "datacenter_id", null: false
+    t.integer "incident_id", null: false
+    t.integer "user_id"
+    t.jsonb "incident_address", default: "{}"
+    t.jsonb "content", default: "{}"
+    t.date "patient_dob"
+    t.datetime "incident_at", default: -> { "CURRENT_TIMESTAMP" }
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "old_audits", id: :bigint, default: -> { "nextval('audits_id_seq1'::regclass)" }, force: :cascade do |t|
     t.bigint "revision_id"
     t.integer "user_id"
@@ -62,6 +105,13 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_21_163552) do
     t.string "datacenter_name", default: "", null: false
   end
 
+  create_table "report_attachments", force: :cascade do |t|
+    t.bigint "audit_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["audit_id"], name: "index_report_attachments_on_audit_id"
+  end
+
   create_table "revisions", force: :cascade do |t|
     t.bigint "case_report_id"
     t.integer "user_id"
@@ -77,6 +127,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_21_163552) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "old_audits", "revisions"
+  add_foreign_key "report_attachments", "audits"
   add_foreign_key "revisions", "old_case_reports", column: "case_report_id"
 
   create_view "case_reports_view", sql_definition: <<-SQL
