@@ -1,16 +1,16 @@
 FactoryBot.define do
-  factory :old_case_report do
+  factory :case_report do
     transient do
       with_sample_attachment { false }
-      with_attachments do
-        with_sample_attachment ?
-          [{
-             filename:     "test-sample",
-             checksum:     "XYFa0qq+ose3hxY01oMYbw==",
-             byte_size:    30954,
-             content_type: "application/pdf"
-           }] : []
-      end
+      with_attachments { []}
+      sample_attachment {
+          {
+            filename:     "test-sample",
+            checksum:     "XYFa0qq+ose3hxY01oMYbw==",
+            byte_size:    30954,
+            content_type: "application/pdf"
+          }
+      }
     end
 
     incident_number { rand(1..2147483647) }
@@ -19,16 +19,14 @@ FactoryBot.define do
     datacenter_name { 'test' }
     incident_at { Time.now }
     report_type { :amended }
-    revisions_attributes do
-      attachment                    = {
-        user_id:        1,
-        responder_name: 'test',
-        name:           'test',
-      }
+    user_id { 1 }
+    responder_name { 'test' }
+    name { 'test' }
 
-      attachment[:files_attributes] = with_attachments if with_attachments.present?
-
-      [attachment]
-    end
+    files_attributes {
+      list = []
+      list << sample_attachment if with_sample_attachment
+      list + with_attachments
+    }
   end
 end

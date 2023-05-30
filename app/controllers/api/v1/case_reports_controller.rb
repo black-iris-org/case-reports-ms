@@ -109,7 +109,7 @@ class Api::V1::CaseReportsController < ApplicationController
   end
 
   def set_case_report
-    @case_report = if skip_audit?
+    @case_report = if action_name == 'update' || skip_audit?
                      @case_reports.find(params[:id])
                    else
                      @case_reports.with_show_auditing { @case_reports.find(params[:id]) }

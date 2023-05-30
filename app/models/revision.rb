@@ -5,8 +5,8 @@ class Revision < ApplicationRecord
   belongs_to :old_case_report, optional: true
   has_many :old_audits
 
-  has_one :creation_audit, -> { where(action: :create) }, class_name: 'OldAudit'
-  has_one :update_audit, -> { where(action: :update) }, class_name: 'OldAudit'
+  has_one :creation_audit, -> { where(action: :create) }, class_name: 'ReportAudit'
+  has_one :update_audit, -> { where(action: :update) }, class_name: 'ReportAudit'
 
   validates_presence_of :user_id, :responder_name, :name
 
@@ -20,14 +20,6 @@ class Revision < ApplicationRecord
   PRIMITIVE_COLUMNS = (column_names - %w[id case_report_id user_id] - JSONB_COLUMNS.keys.map(&:to_s)).freeze
 
   scope :with_case_report, -> { eager_load(:case_report) }
-
-  serialize :incident_address, Serializers::IndifferentHash
-  serialize :content, Serializers::IndifferentHash
-
-  def set_defaults
-    self.incident_address ||= {}
-    self.content ||= {}
-  end
 
   def validate_not_identical
     if case_report&.revision&.attributes&.except('id') == attributes&.except('id')

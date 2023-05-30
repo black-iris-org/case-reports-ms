@@ -65,7 +65,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_21_163552) do
     t.index ["user_id", "user_type"], name: "user_index"
   end
 
-  create_table "case_reports", id: :bigint, default: -> { "nextval('new_case_reports_id_seq'::regclass)" }, force: :cascade do |t|
+  create_table "case_reports", force: :cascade do |t|
     t.string "name"
     t.string "first_name"
     t.string "last_name"
@@ -85,7 +85,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_21_163552) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "old_audits", id: :bigint, default: -> { "nextval('audits_id_seq1'::regclass)" }, force: :cascade do |t|
+  create_table "old_audits", force: :cascade do |t|
     t.bigint "revision_id"
     t.integer "user_id"
     t.string "user_name"
@@ -94,7 +94,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_21_163552) do
     t.datetime "action_at", default: -> { "CURRENT_TIMESTAMP" }
     t.string "first_name"
     t.string "last_name"
-    t.index ["revision_id"], name: "index_audits_on_revision_id"
+    t.index ["revision_id"], name: "index_old_audits_on_revision_id"
   end
 
   create_table "old_case_reports", force: :cascade do |t|
@@ -103,6 +103,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_21_163552) do
     t.integer "datacenter_id", null: false
     t.integer "incident_id", null: false
     t.string "datacenter_name", default: "", null: false
+    t.index ["incident_id"], name: "index_old_case_reports_on_incident_id"
   end
 
   create_table "report_attachments", force: :cascade do |t|

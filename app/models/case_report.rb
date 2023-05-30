@@ -6,6 +6,8 @@ class CaseReport < ApplicationRecord
 
   has_many :report_audits, foreign_key: :auditable_id
 
+  before_create :set_defaults
+
   JSONB_COLUMNS = {
     incident_address: [:name, lat_lng: { coordinates: [] }],
     content: {}
@@ -15,14 +17,25 @@ class CaseReport < ApplicationRecord
   # attr_readonly :revision_id, :revisions_count, :report_type, :incident_number, :incident_at, :datacenter_id,
   #               :datacenter_name, :incident_id
 
+  serialize :incident_address, Serializers::IndifferentHash
+  serialize :content, Serializers::IndifferentHash
+
   def revisions_count
     revisions.size
   end
 
   def report_type
-    return :original if audit_version == 1
-    return :amended if audit_version&.> 1
+    return :original if audit_version == 0
+    return :amended if audit_version&.> 0
 
     revisions.size > 1 ? :amended : :original
   end
+
+  private
+
+  def set_defaults
+    self.incident_address ||= {}
+    self.content ||= {}
+  end
+
 end

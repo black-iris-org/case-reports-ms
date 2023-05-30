@@ -20,7 +20,7 @@ module CaseReport::FilesConcern
     end
 
     def direct_upload_urls
-      files.map { |file| file&.service&.send(:object_for, file&.key)&.presigned_url(:put) }
+      files&.map { |file| file&.service&.send(:object_for, file&.key)&.presigned_url(:put) } || []
     end
 
     def attachments
@@ -31,7 +31,7 @@ module CaseReport::FilesConcern
           content_type: file.content_type,
           url:          file.service&.send(:object_for, file.key)&.presigned_url(:get)
         }
-      end
+      end || []
     end
 
     def audit
