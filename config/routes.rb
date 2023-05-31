@@ -10,14 +10,6 @@ Rails.application.routes.draw do
         resources :audits, only: [:index]
       end
 
-      resources :users do
-        resources :revisions, only: [:index, :show]
-      end
-
-      resources :revisions, only: [:index, :show] do
-        resources :audits, only: [:index]
-      end
-
       resources :incidents, only: [] do
         resources :case_reports, only: [:index]
       end
