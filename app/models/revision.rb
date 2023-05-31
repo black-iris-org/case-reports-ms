@@ -1,9 +1,4 @@
 class Revision < ApplicationRecord
-  include FilterConcern
-  include FilesConcern
-
-  belongs_to :old_case_report, optional: true
-  has_many :old_audits
 
   has_one :creation_audit, -> { where(action: :create) }, class_name: 'ReportAudit'
   has_one :update_audit, -> { where(action: :update) }, class_name: 'ReportAudit'
@@ -27,7 +22,4 @@ class Revision < ApplicationRecord
     end
   end
 
-  def created_at
-    creation_audit&.action_at || update_audit&.action_at
-  end
 end
