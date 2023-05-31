@@ -33,7 +33,7 @@ class Api::V1::AuditsController < ApplicationController
   end
 
   def index_params
-    params.permit(:case_report_id, :revision_id, :action_at, :action_time_from, :action_time_to, :user_id, :incident_number)
+    params.permit(:case_report_id, :version, :action_at, :action_time_from, :action_time_to, :user_id, :incident_number)
   end
 
   def filtration_params

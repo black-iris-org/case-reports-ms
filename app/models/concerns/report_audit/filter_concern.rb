@@ -36,7 +36,7 @@ module ReportAudit::FilterConcern
 
   class_methods do
     def filterable_attributes
-      [:revision_id, :user_id]
+      [:version, :user_id]
     end
   end
 end
