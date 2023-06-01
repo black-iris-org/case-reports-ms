@@ -231,19 +231,20 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
       end
 
       it do
-        expect(json_response[:case_report].with_indifferent_access).to include(datacenter_id:    1,
-                                                                               datacenter_name:  'test',
-                                                                               incident_id:      case_report_1.incident_id,
-                                                                               incident_number:  case_report_1.incident_number,
-                                                                               report_type:      'original',
-                                                                               revisions_count:  1,
-                                                                               user_id:          1,
-                                                                               name:             'test',
-                                                                               attachments:      [],
-                                                                               incident_address: {},
-                                                                               content:          {},
-                                                                               patient_dob:      nil,
-                                                                               patient_name:     nil)
+        expect(json_response[:case_report].with_indifferent_access)
+          .to include(datacenter_id:    1,
+                      datacenter_name:  'test',
+                      incident_id:      case_report_1.incident_id,
+                      incident_number:  case_report_1.incident_number,
+                      report_type:      'original',
+                      revisions_count:  1,
+                      user_id:          1,
+                      name:             'test',
+                      attachments:      [],
+                      incident_address: {},
+                      content:          {},
+                      patient_dob:      nil,
+                      patient_name:     nil)
       end
 
       it 'should create audit' do
