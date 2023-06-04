@@ -26,6 +26,8 @@ class CaseReport < ApplicationRecord
 
   scope :by_incident_id, ->(incident_id) { where(incident_id: incident_id) }
 
+  alias_attribute :version, :audit_version
+
   def revisions_count
     revisions.size
   end

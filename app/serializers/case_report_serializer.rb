@@ -9,4 +9,9 @@ class CaseReportSerializer < ApplicationSerializer
   view :without_health_data do
     excludes :content, :attachments, :patient_name, :patient_dob
   end
+
+  view :revision_view do
+    include_views :without_health_data
+    fields :version
+  end
 end

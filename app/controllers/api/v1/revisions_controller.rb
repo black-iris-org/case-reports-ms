@@ -14,7 +14,8 @@ class Api::V1::RevisionsController < ApplicationController
     render json: CaseReportSerializer.render(
       paginate(@revisions),
       root: :revisions,
-      meta: pagination_status
+      meta: pagination_status,
+      view: :revision_view
     )
   end
 
