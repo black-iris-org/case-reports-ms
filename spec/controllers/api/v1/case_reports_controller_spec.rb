@@ -221,12 +221,10 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
 
   describe 'GET #show' do
     context 'return case_report' do
-      before do
+      it do
         get "/api/v1/case_reports/#{case_report_1.id}", headers: headers
         case_report_1.reload
-      end
 
-      it do
         expect(json_response[:case_report])
           .to include(datacenter_id:    1,
                       datacenter_name:  'test',
@@ -244,10 +242,14 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
       end
 
       it 'should create audit' do
-        expect(ReportAudit.count).to eq(2)
+        expect do
+          get "/api/v1/case_reports/#{case_report_1.id}", headers: headers
+        end.to change { ReportAudit.count }.by(2)
       end
 
       it 'report_type still original once shown' do
+        get "/api/v1/case_reports/#{case_report_1.id}", headers: headers
+
         expect(json_response[:case_report]['report_type']).to eq('original')
       end
     end
