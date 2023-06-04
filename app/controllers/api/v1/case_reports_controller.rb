@@ -17,13 +17,13 @@ class Api::V1::CaseReportsController < ApplicationController
   end
 
   def create
-    @case_report = CaseReport.create!(new_create_params)
+    @case_report = CaseReport.create!(create_params)
     # @revision_id = @case_report.revision_id
     render json: CaseReportSerializer.render(@case_report, root: :case_report, **serializer_options)
   end
 
   def update
-    @case_report.update!(new_update_params)
+    @case_report.update!(update_params)
     # @revision_id = @case_report.revision_id
     render json: CaseReportSerializer.render(@case_report, root: :case_report, **serializer_options)
   end
@@ -36,14 +36,6 @@ class Api::V1::CaseReportsController < ApplicationController
 
   def create_params
     params.require(:case_report).permit(:incident_number, :incident_at, :incident_id).merge(
-      datacenter_id:        requester_datacenter,
-      datacenter_name:      requester_datacenter_name,
-      revisions_attributes: [revision_params]
-    )
-  end
-
-  def new_create_params
-    params.require(:case_report).permit(:incident_number, :incident_at, :incident_id).merge(
       datacenter_id:   requester_datacenter,
       datacenter_name: requester_datacenter_name,
     ).merge params.require(:case_report).permit(*revision_attributes)
@@ -52,14 +44,6 @@ class Api::V1::CaseReportsController < ApplicationController
   end
 
   def update_params
-    {
-      datacenter_id:        requester_datacenter,
-      datacenter_name:      requester_datacenter_name,
-      revisions_attributes: [revision_params]
-    }
-  end
-
-  def new_update_params
     {
       datacenter_id:   requester_datacenter,
       datacenter_name: requester_datacenter_name
