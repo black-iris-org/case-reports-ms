@@ -12,6 +12,8 @@ module AuditsConcern
     end
 
     def skip_audit?
+      return true if action_name == 'update'
+
       skip = request.headers['X-Skip-Audit']
       skip.present? && ActiveModel::Type::Boolean.new.cast(skip)
     end
