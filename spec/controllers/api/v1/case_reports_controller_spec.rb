@@ -255,13 +255,11 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
     end
 
     context 'with skipping audit' do
-      before do
-        get "/api/v1/case_reports/#{case_report_1.id}", headers: headers.merge('X-Skip-Audit': 'true')
-        case_report_1.reload
-      end
-
       it 'should not create audit' do
-        expect(ReportAudit.count).to eq(1)
+        case_report_1
+        expect do
+          get "/api/v1/case_reports/#{case_report_1.id}", headers: headers.merge('X-Skip-Audit': 'true')
+        end.not_to change { ReportAudit.count }
       end
     end
   end
