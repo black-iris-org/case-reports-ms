@@ -220,10 +220,6 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
   end
 
   describe 'GET #show' do
-    before do
-      case_report_1.reload
-    end
-
     context 'return case_report' do
       before do
         get "/api/v1/case_reports/#{case_report_1.id}", headers: headers
@@ -231,7 +227,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
       end
 
       it do
-        expect(json_response[:case_report].with_indifferent_access)
+        expect(json_response[:case_report])
           .to include(datacenter_id:    1,
                       datacenter_name:  'test',
                       incident_id:      case_report_1.incident_id,
