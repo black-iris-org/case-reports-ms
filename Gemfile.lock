@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/shqear93/audited.git
-  revision: 53ddbf49f50d35d037cb55f18893f5b82f3b4df2
+  revision: fd38c1dbaf794a5c2778c487e7768ebb7d0edc43
   specs:
     audited (5.3.3)
       activerecord (>= 5.0, < 7.1)
