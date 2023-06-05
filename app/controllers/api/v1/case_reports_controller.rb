@@ -18,7 +18,6 @@ class Api::V1::CaseReportsController < ApplicationController
 
   def create
     @case_report = CaseReport.create!(create_params)
-    # @revision_id = @case_report.revision_id
     render json: CaseReportSerializer.render(@case_report, root: :case_report, **serializer_options)
   end
 
