@@ -12,6 +12,7 @@ class CaseReportSerializer < ApplicationSerializer
 
   view :revision_view do
     include_views :without_health_data
+    excludes :revisions_count
     fields :version
   end
 end
