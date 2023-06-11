@@ -33,8 +33,7 @@ class CaseReport < ApplicationRecord
   end
 
   def report_type
-    return :original if audit_version == 0
-    return :amended if audit_version&.> 0
+    return :amended if audit_version&.> 1
 
     revisions.size > 1 ? :amended : :original
   end
