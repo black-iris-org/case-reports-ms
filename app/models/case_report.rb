@@ -39,6 +39,11 @@ class CaseReport < ApplicationRecord
     revisions.size > 1 ? :amended : :original
   end
 
+  # Print current created_at, if the object was a revision, it will print the corresponding audit time
+  def created_at
+    super || audit.created_at
+  end
+
   private
 
   def set_defaults
