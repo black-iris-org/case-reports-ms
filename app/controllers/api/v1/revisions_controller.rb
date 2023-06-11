@@ -34,7 +34,7 @@ class Api::V1::RevisionsController < ApplicationController
 
   def set_revisions
     if @case_report.present?
-      @revisions = @case_report.revisions
+      @revisions = @case_report.revisions.reverse
     else
       # Backward compatibility - empty array instead of all revisions
       @revisions = []
