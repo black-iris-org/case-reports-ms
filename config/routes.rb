@@ -10,6 +10,28 @@ Rails.application.routes.draw do
         resources :audits, only: [:index]
       end
 
+      resources :users do
+        resources :revisions, only: [:index, :show]
+      end
+
+      resources :revisions, only: [:index, :show] do
+        resources :audits, only: [:index]
+      end
+
+      resources :incidents, only: [] do
+        resources :case_reports, only: [:index]
+      end
+
+      resources :audits, only: [:index, :create]
+      resources :audit_reports, only: [:create]
+    end
+
+    namespace :v2 do
+      resources :case_reports, only: [:create, :show, :update, :index] do
+        resources :revisions, only: [:index, :show]
+        resources :audits, only: [:index]
+      end
+
       resources :incidents, only: [] do
         resources :case_reports, only: [:index]
       end

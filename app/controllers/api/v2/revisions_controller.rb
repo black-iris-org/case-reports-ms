@@ -1,4 +1,4 @@
-class Api::V1::RevisionsController < ApplicationController
+class Api::V2::RevisionsController < ApplicationController
   include FiltrationConcern
   include AuditsConcern
   include PaginationConcern
@@ -11,13 +11,16 @@ class Api::V1::RevisionsController < ApplicationController
   before_action :set_audit_additional_data, only: [:show], unless: :skip_audit?
 
   def index
-    render json: V1::CaseReportSerializer.render(
-      @case_report,
-      root: :case_report,
-      revisions: paginate(@revisions),
+    render json: V2::CaseReportSerializer.render(
+      paginate(@revisions),
+      root: :revisions,
       meta: pagination_status,
-      view: :with_custom_revisions
+      view: :revision_view
     )
+  end
+
+  def show
+    render json: V2::CaseReportSerializer.render(@case_report, root: :revision)
   end
 
   private
@@ -34,7 +37,7 @@ class Api::V1::RevisionsController < ApplicationController
 
   def set_revisions
     if @case_report.present?
-      @revisions = @case_report.revisions
+      @revisions = @case_report.revisions.reverse
     else
       # Backward compatibility - empty array instead of all revisions
       @revisions = []

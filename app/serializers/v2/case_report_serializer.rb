@@ -1,4 +1,4 @@
-class CaseReportSerializer < ApplicationSerializer
+class V2::CaseReportSerializer < ApplicationSerializer
   identifier :id
   fields :datacenter_id, :datacenter_name, :incident_number, :incident_id, :incident_at, :incident_number,
          :revisions_count, :report_type, :user_id, :responder_name, :patient_name, :patient_dob, :incident_address,
@@ -6,12 +6,12 @@ class CaseReportSerializer < ApplicationSerializer
 
   field :direct_upload_urls, if: ->(_field_name, _user, options) { options[:with_direct_upload_urls] }
 
-  view :without_health_data do
+  view :list_view do
     excludes :content, :attachments, :patient_name, :patient_dob
   end
 
   view :revision_view do
-    include_views :without_health_data
+    include_views :list_view
     excludes :revisions_count
     fields :version
   end

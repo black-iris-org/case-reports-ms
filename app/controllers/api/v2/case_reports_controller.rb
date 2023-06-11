@@ -1,4 +1,4 @@
-class Api::V1::CaseReportsController < ApplicationController
+class Api::V2::CaseReportsController < ApplicationController
   include AuditsConcern
   include PaginationConcern
   include FiltrationConcern
@@ -9,7 +9,7 @@ class Api::V1::CaseReportsController < ApplicationController
   before_action :set_audit_additional_data, only: [:create, :show, :update], unless: :skip_audit?
 
   def index
-    render json: V1::CaseReportSerializer.render(
+    render json: V2::CaseReportSerializer.render(
       paginate(@case_reports),
       root: :case_reports, meta: pagination_status,
       view: :list_view
@@ -18,26 +18,16 @@ class Api::V1::CaseReportsController < ApplicationController
 
   def create
     @case_report = CaseReport.create!(create_params)
-    render json: V1::CaseReportSerializer.render(
-      @case_report,
-      root: :case_report,
-      view: :show_view,
-      **serializer_options
-    )
+    render json: V2::CaseReportSerializer.render(@case_report, root: :case_report, **serializer_options)
   end
 
   def update
     @case_report.update!(update_params)
-    render json: V1::CaseReportSerializer.render(
-      @case_report,
-      root: :case_report,
-      view: :show_view,
-      **serializer_options
-    )
+    render json: V2::CaseReportSerializer.render(@case_report, root: :case_report, **serializer_options)
   end
 
   def show
-    render json: V1::CaseReportSerializer.render(@case_report, root: :case_report, view: :show_view)
+    render json: V2::CaseReportSerializer.render(@case_report, root: :case_report)
   end
 
   private
