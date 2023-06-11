@@ -5,10 +5,9 @@ module CaseReport::FilesConcern
   include Filterable
 
   included do
-    # has_many_attached :files
     delegate :files, :files_blobs, to: :audit, allow_nil: true
 
-    after_save :set_report_attachment
+    set_callback :audit, :around, :set_report_attachment
 
     def files_attributes=(value)
       return if value.blank?
@@ -36,27 +35,24 @@ module CaseReport::FilesConcern
 
     def audit
       if audit_version.present?
-        audits.find_by(version: audit_version)
+        audits.order(created_at: :desc).find_by(version: audit_version)
       else
-        audits.creates.or(audits.updates).last
+        audits.modifies.last
       end
     end
 
     def files
-      # TODO: to find the right revision number
       audit.files
     end
 
     private
 
     def set_report_attachment
-      return true if @report_attachment.blank?
-      audit = audits.creates.or(audits.updates).last
+      audit = yield
+      return unless audit.auditable_action?
 
-      return if audit.blank?
       audit.report_attachment = @report_attachment
-
-      @report_attachment = nil
+      @report_attachment      = nil
     end
   end
 

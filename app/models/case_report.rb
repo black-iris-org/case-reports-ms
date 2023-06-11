@@ -1,4 +1,6 @@
 class CaseReport < ApplicationRecord
+  audited
+
   include FilesConcern
   include FilterConcern
 
@@ -7,8 +9,6 @@ class CaseReport < ApplicationRecord
     content:          {}
   }.freeze
   PRIMITIVE_COLUMNS = (column_names - JSONB_COLUMNS.keys.map(&:to_s)).freeze
-
-  audited
 
   has_many :report_audits, foreign_key: :auditable_id
 
