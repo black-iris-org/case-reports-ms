@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Api::V1::CaseReportsController, type: :request do
+RSpec.describe Api::V2::CaseReportsController, type: :request do
   include JsonResponse
 
   let(:case_report_1) { FactoryBot.create(:case_report) }
@@ -45,7 +45,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
   describe 'POST #create' do
     context 'valid attributes' do
       before do
-        post "/api/v1/case_reports", params: { case_report: valid_attributes }, headers: headers
+        post "/api/v2/case_reports", params: { case_report: valid_attributes }, headers: headers
       end
 
       it 'should create case_report' do
@@ -93,7 +93,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
       let(:report) { CaseReport.find(json_response.dig('case_report', 'id')) }
 
       before do
-        post "/api/v1/case_reports", params: params, headers: headers
+        post "/api/v2/case_reports", params: params, headers: headers
       end
 
       context 'should create valid attachment' do
@@ -122,7 +122,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
 
     context 'valid update columns' do
       before do
-        put "/api/v1/case_reports/#{case_report_1.id}",
+        put "/api/v2/case_reports/#{case_report_1.id}",
             params:  { case_report: { user_id: 1, responder_name: 'test_2', name: 'test' } },
             headers: headers
         case_report_1.reload
@@ -162,7 +162,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
 
     context 'can not update user_id column' do
       before do
-        put "/api/v1/case_reports/#{case_report_1.id}",
+        put "/api/v2/case_reports/#{case_report_1.id}",
             params:  { case_report: { user_id: 2, responder_name: 'test_2', name: 'test' } },
             headers: headers
         case_report_1.reload
@@ -177,7 +177,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
       let!(:report) { FactoryBot.create(:case_report, with_sample_attachment: true) }
 
       before do
-        put "/api/v1/case_reports/#{report.id}", params: params, headers: headers
+        put "/api/v2/case_reports/#{report.id}", params: params, headers: headers
         report.reload
       end
 
@@ -222,7 +222,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
   describe 'GET #show' do
     context 'return case_report' do
       it do
-        get "/api/v1/case_reports/#{case_report_1.id}", headers: headers
+        get "/api/v2/case_reports/#{case_report_1.id}", headers: headers
         case_report_1.reload
 
         expect(json_response[:case_report])
@@ -243,12 +243,12 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
 
       it 'should create audit' do
         expect do
-          get "/api/v1/case_reports/#{case_report_1.id}", headers: headers
+          get "/api/v2/case_reports/#{case_report_1.id}", headers: headers
         end.to change { ReportAudit.count }.by(2)
       end
 
       it 'report_type still original once shown' do
-        get "/api/v1/case_reports/#{case_report_1.id}", headers: headers
+        get "/api/v2/case_reports/#{case_report_1.id}", headers: headers
 
         expect(json_response[:case_report]['report_type']).to eq('original')
       end
@@ -258,7 +258,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
       it 'should not create audit' do
         case_report_1
         expect do
-          get "/api/v1/case_reports/#{case_report_1.id}", headers: headers.merge('X-Skip-Audit': 'true')
+          get "/api/v2/case_reports/#{case_report_1.id}", headers: headers.merge('X-Skip-Audit': 'true')
         end.not_to change { ReportAudit.count }
       end
     end
@@ -272,7 +272,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
 
     context 'return all case reports with the last revision' do
       before do
-        get "/api/v1/case_reports", headers: headers
+        get "/api/v2/case_reports", headers: headers
       end
 
       it 'should return two case reports' do
@@ -295,7 +295,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
       end
 
       it 'case_report_1' do
-        get "/api/v1/case_reports", headers: headers
+        get "/api/v2/case_reports", headers: headers
         expect(json_response[:case_reports].last.with_indifferent_access)
           .to include(id:               case_report_1.id,
                       datacenter_id:    1,
@@ -314,7 +314,7 @@ RSpec.describe Api::V1::CaseReportsController, type: :request do
     context 'return all case reports belongs to same incident with the last revision' do
       before do
         case_report_3.reload
-        get "/api/v1/incidents/#{case_report_1.incident_id}/case_reports", headers: headers
+        get "/api/v2/incidents/#{case_report_1.incident_id}/case_reports", headers: headers
       end
 
       it 'should return two case reports' do

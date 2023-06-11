@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Api::V1::RevisionsController, type: :request do
+RSpec.describe Api::V2::RevisionsController, type: :request do
   include JsonResponse
 
   let(:case_report_1) { FactoryBot.create(:case_report) }
@@ -24,7 +24,7 @@ RSpec.describe Api::V1::RevisionsController, type: :request do
   before do
     case_report_1.reload
 
-    put "/api/v1/case_reports/#{case_report_1.id}",
+    put "/api/v2/case_reports/#{case_report_1.id}",
         params:  { case_report: { user_id: 1, responder_name: 'test_2', name: 'test' } },
         headers: headers
 
@@ -39,7 +39,7 @@ RSpec.describe Api::V1::RevisionsController, type: :request do
 
       context 'case_report_id' do
         it "should return all revisions of particular case_report" do
-          get "/api/v1/case_reports/#{case_report_1.id}/revisions", params: { format: :json }, headers: headers
+          get "/api/v2/case_reports/#{case_report_1.id}/revisions", params: { format: :json }, headers: headers
 
           expect(json_response[:revisions].size).to eq(2)
 
@@ -49,7 +49,7 @@ RSpec.describe Api::V1::RevisionsController, type: :request do
                         incident_id:      case_report_1.incident_id,
                         incident_number:  case_report_1.incident_number,
                         report_type:      'amended',
-                        responder_name:   'test',
+                        responder_name:   'test_2',
                         user_id:          1,
                         name:             'test',
                         incident_address: {})
@@ -60,7 +60,7 @@ RSpec.describe Api::V1::RevisionsController, type: :request do
                         incident_id:      case_report_1.incident_id,
                         incident_number:  case_report_1.incident_number,
                         report_type:      'amended',
-                        responder_name:   'test_2',
+                        responder_name:   'test',
                         user_id:          1,
                         name:             'test',
                         incident_address: {})

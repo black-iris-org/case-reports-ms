@@ -1,5 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe ReportAttachment, type: :model do
-  pending "add some examples to (or delete) #{__FILE__}"
+  describe 'associations' do
+    it { should belong_to(:case_report).with_foreign_key(:audit_id).optional }
+    it { should have_many_attached(:files) }
+  end
 end

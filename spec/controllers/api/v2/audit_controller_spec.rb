@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Api::V1::AuditsController, type: :request do
+RSpec.describe Api::V2::AuditsController, type: :request do
   include JsonResponse
 
   let(:case_report) { FactoryBot.create(:case_report) }
@@ -19,27 +19,26 @@ RSpec.describe Api::V1::AuditsController, type: :request do
   end
 
   before do
-    get "/api/v1/case_reports/#{case_report.id}", headers: headers
+    get "/api/v2/case_reports/#{case_report.id}", headers: headers
   end
 
   describe 'GET #index' do
     context 'list without filters' do
       it "should return all audits" do
-        get "/api/v1/audits", params: { format: :json }, headers: headers
+        get "/api/v2/audits", params: { format: :json }, headers: headers
 
-        expect(json_response[:audits].last)
+        expect(json_response[:audits][0])
+          .to include(
+                "case_report_id"  => case_report.id,
+                "version"         => 1,
+                "action"          => 'show',
+                "incident_number" => case_report.incident_number
+              )
+        expect(json_response[:audits][1])
           .to include(
                 "case_report_id"  => case_report.id,
                 "version"         => 1,
                 "action"          => 'create',
-                "incident_number" => case_report.incident_number
-              )
-
-        expect(json_response[:audits].first)
-          .to include(
-                "case_report_id"  => case_report.id,
-                "version"         => 2,
-                "action"          => 'show',
                 "incident_number" => case_report.incident_number
               )
       end
@@ -47,14 +46,14 @@ RSpec.describe Api::V1::AuditsController, type: :request do
 
     describe 'list with filters' do
       before do
-        get "/api/v1/case_reports/#{case_report_2.id}", headers: headers
+        get "/api/v2/case_reports/#{case_report_2.id}", headers: headers
       end
 
       context 'case_report_id' do
         it "should return audits that belongs to the same case_report" do
           case_report
 
-          get "/api/v1/case_reports/#{case_report_2.id}/audits", params: { format: :json }, headers: headers
+          get "/api/v2/case_reports/#{case_report_2.id}/audits", params: { format: :json }, headers: headers
 
           expect(json_response[:audits].size).to eq(2)
           expect(json_response[:audits].pluck('case_report_id')).to include(case_report_2.id)
@@ -65,7 +64,7 @@ RSpec.describe Api::V1::AuditsController, type: :request do
       context 'version' do
         it "should return audits that belongs to the same case_report" do
           case_report
-          get "/api/v1/case_reports/#{case_report_2.id}/audits", params: { version: 1, format: :json }, headers: headers
+          get "/api/v2/case_reports/#{case_report_2.id}/audits", params: { version: 1, format: :json }, headers: headers
 
           expect(json_response[:audits].pluck('version').uniq).to eq([1])
         end
@@ -75,7 +74,7 @@ RSpec.describe Api::V1::AuditsController, type: :request do
         it "should return audits that belongs to the same case_report" do
           case_report
 
-          get "/api/v1/case_reports/#{case_report_2.id}/audits", params: { incident_number: case_report_2.incident_number, format: :json }, headers: headers
+          get "/api/v2/case_reports/#{case_report_2.id}/audits", params: { incident_number: case_report_2.incident_number, format: :json }, headers: headers
 
           expect(json_response[:audits].pluck('incident_number').uniq).to eq([case_report_2.incident_number])
         end
@@ -83,8 +82,8 @@ RSpec.describe Api::V1::AuditsController, type: :request do
 
       context 'user_id' do
         it "should return audits that belongs to the same user" do
-          get "/api/v1/case_reports/#{case_report.id}", headers: headers.merge('Requester-Id': 2)
-          get "/api/v1/case_reports/#{case_report.id}/audits", params: { user_id: 1, format: :json }, headers: headers
+          get "/api/v2/case_reports/#{case_report.id}", headers: headers.merge('Requester-Id': 2)
+          get "/api/v2/case_reports/#{case_report.id}/audits", params: { user_id: 1, format: :json }, headers: headers
 
           # using let in spec does not populate user_id field, so we expect 1 here instead of 2
           expect(json_response[:audits].size).to eq(1)
@@ -105,7 +104,9 @@ RSpec.describe Api::V1::AuditsController, type: :request do
       it "should create new audit with user_id" do
 
         expect do
-          get "/api/v1/case_reports/#{case_report.id}", headers: headers, params: { format: :json }.merge(case_report: FactoryBot.build(:case_report).as_json)
+          get "/api/v2/case_reports/#{case_report.id}",
+              headers: headers,
+              params:  { format: :json }.merge(case_report: FactoryBot.build(:case_report).as_json)
         end.to change { ReportAudit.count }.by(1)
 
         expect(ReportAudit.last.attributes)
