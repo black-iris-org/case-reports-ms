@@ -15,4 +15,9 @@ class V2::CaseReportSerializer < ApplicationSerializer
     excludes :revisions_count
     fields :version
   end
+
+  view :full_details do
+    excludes :revisions_count
+    fields :version
+  end
 end

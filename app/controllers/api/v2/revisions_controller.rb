@@ -7,6 +7,7 @@ class Api::V2::RevisionsController < ApplicationController
   before_action :set_case_report, only: [:index, :show]
   before_action :set_revisions, only: [:index, :show]
   before_action :set_user_filter, only: [:index, :show]
+  before_action :set_view_name, only: [:index, :show]
   before_action :set_revision, only: [:show]
   before_action :set_audit_additional_data, only: [:show], unless: :skip_audit?
 
@@ -15,12 +16,18 @@ class Api::V2::RevisionsController < ApplicationController
       paginate(@revisions),
       root: :revisions,
       meta: pagination_status,
-      view: :revision_view
+      view: @view
     )
   end
 
   def show
     render json: V2::CaseReportSerializer.render(@case_report, root: :revision)
+  end
+
+  private
+
+  def set_view_name
+    @view = params[:view]&.to_sym || :revision_view
   end
 
   private

@@ -54,10 +54,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_21_163552) do
     t.jsonb "audited_changes"
     t.integer "version", default: 0
     t.string "comment"
+    t.jsonb "additional_data"
     t.string "remote_address"
     t.string "request_uuid"
     t.datetime "created_at"
-    t.jsonb "additional_data"
     t.index ["associated_type", "associated_id"], name: "associated_index"
     t.index ["auditable_type", "auditable_id", "version"], name: "auditable_index"
     t.index ["created_at"], name: "index_audits_on_created_at"
