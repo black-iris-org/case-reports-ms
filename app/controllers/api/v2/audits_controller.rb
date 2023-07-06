@@ -1,11 +1,11 @@
-class Api::V1::AuditsController < ApplicationController
+class Api::V2::AuditsController < ApplicationController
   include PaginationConcern
   include FiltrationConcern
 
   before_action :set_audits
 
   def index
-    render json: V1::AuditSerializer.render(paginate(@audits), root: :audits, meta: pagination_status)
+    render json: V2::AuditSerializer.render(paginate(@audits), root: :audits, meta: pagination_status)
   end
 
   def create
@@ -15,7 +15,7 @@ class Api::V1::AuditsController < ApplicationController
       @audit.update!(user_type: audit_params[:user_type]) if audit_params[:user_type].present?
     end
 
-    render json: V1::AuditSerializer.render(@audit, root: :audit)
+    render json: V2::AuditSerializer.render(@audit, root: :audit)
   end
 
   private

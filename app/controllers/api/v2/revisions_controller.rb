@@ -1,4 +1,4 @@
-class Api::V1::RevisionsController < ApplicationController
+class Api::V2::RevisionsController < ApplicationController
   include FiltrationConcern
   include AuditsConcern
   include PaginationConcern
@@ -7,17 +7,27 @@ class Api::V1::RevisionsController < ApplicationController
   before_action :set_case_report, only: [:index, :show]
   before_action :set_revisions, only: [:index, :show]
   before_action :set_user_filter, only: [:index, :show]
+  before_action :set_view_name, only: [:index, :show]
   before_action :set_revision, only: [:show]
   before_action :set_audit_additional_data, only: [:show], unless: :skip_audit?
 
   def index
-    render json: V1::CaseReportSerializer.render(
-      @case_report,
-      root: :case_report,
-      revisions: paginate(@revisions),
+    render json: V2::CaseReportSerializer.render(
+      paginate(@revisions),
+      root: :revisions,
       meta: pagination_status,
-      view: :with_custom_revisions
+      view: @view
     )
+  end
+
+  def show
+    render json: V2::CaseReportSerializer.render(@case_report, root: :revision)
+  end
+
+  private
+
+  def set_view_name
+    @view = params[:view]&.to_sym || :revision_view
   end
 
   private

@@ -53,6 +53,8 @@ gem 'mailgun-ruby'
 # cloud storage & attachments
 gem "aws-sdk-s3"
 
+gem 'audited', github: 'shqear93/audited'
+
 group :development do
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   gem "spring"
@@ -64,4 +66,8 @@ group :development, :test do
   gem 'shoulda-matchers'
   gem 'factory_bot_rails'
   gem 'faker'
+end
+
+group :test do
+  gem 'database_cleaner'
 end

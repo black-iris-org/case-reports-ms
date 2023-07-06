@@ -4,23 +4,16 @@ module AuditsConcern
   included do
     private
 
-    def add_audit_record(action = action_name)
-      Audit.create!(
-        revision_id: @revision_id,
-        user_id: requester_id,
-        user_name: requester_name,
+    def set_audit_additional_data
+      CaseReport.set_additional_data(
         first_name: requester_first_name,
         last_name: requester_last_name,
-        user_type: requester_role,
-        action: action
       )
-    rescue StandardError => exception
-      warn "Something went wrong while saving the audit record"
-      warn "Action name: #{action_name}"
-      warn "Exception message: #{exception.message}"
     end
 
     def skip_audit?
+      return true if action_name == 'update'
+
       skip = request.headers['X-Skip-Audit']
       skip.present? && ActiveModel::Type::Boolean.new.cast(skip)
     end

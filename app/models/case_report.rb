@@ -1,42 +1,53 @@
 class CaseReport < ApplicationRecord
-  include CaseReport::RevisionSavingConcern
-  include CaseReport::FilterConcern
+  audited
 
-  self.primary_key = :id
-  set_to_view
+  include FilesConcern
+  include FilterConcern
 
-  attribute :revision_id
-  attribute :revision
-  attr_readonly :revision_id, :revisions_count, :report_type,
-                :incident_number, :incident_at, :datacenter_id, :datacenter_name,
-                :incident_id
+  JSONB_COLUMNS     = {
+    incident_address: [:name, lat_lng: { coordinates: [] }],
+    content:          {}
+  }.freeze
+  PRIMITIVE_COLUMNS = (column_names - JSONB_COLUMNS.keys.map(&:to_s)).freeze
 
-  enum report_type: [:original, :amended]
-
-  has_many :revisions
-  has_one :revision, foreign_key: :id, primary_key: :revision_id
-
-  accepts_nested_attributes_for :revisions
-
-  validates_presence_of :datacenter_id, :incident_number, :incident_id
-  validates_presence_of :revisions, on: :create
+  has_many :report_audits, foreign_key: :auditable_id
 
   before_create :set_defaults
 
-  scope :without_review_column, -> { select(column_names - ['review_id']) }
-  scope :with_revision, -> { eager_load(:revision) }
-  scope :by_incident_id, ->(incident_id){ where(incident_id: incident_id) }
+  validates_presence_of :datacenter_id, :incident_number, :incident_id
+
+  enum report_type: [:original, :amended]
+
+  attr_readonly :revisions_count, :report_type, :incident_number, :incident_at, :datacenter_id,
+                :datacenter_name, :incident_id
+
+  serialize :incident_address, Serializers::IndifferentHash
+  serialize :content, Serializers::IndifferentHash
+
+  scope :by_incident_id, ->(incident_id) { where(incident_id: incident_id) }
+
+  alias_attribute :version, :audit_version
+
+  def revisions_count
+    revisions.size
+  end
+
+  def report_type
+    return :amended if audit_version&.> 1
+
+    revisions.size > 1 ? :amended : :original
+  end
+
+  # Print current created_at, if the object was a revision, it will print the corresponding audit time
+  def created_at
+    super || audit&.created_at
+  end
+
+  private
 
   def set_defaults
-    self.incident_at ||= Time.now
+    self.incident_address ||= {}
+    self.content          ||= {}
   end
 
-  def set_custom_revision(value)
-    instance_eval do
-      def revision
-        @revision
-      end
-    end
-    @revision = value
-  end
 end

@@ -1,3 +1,11 @@
+GIT
+  remote: https://github.com/shqear93/audited.git
+  revision: 731af5c818d43c4e78c3b6251e96603a163b3a92
+  specs:
+    audited (5.3.3)
+      activerecord (>= 5.0, < 7.1)
+      request_store (~> 1.2)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -89,6 +97,12 @@ GEM
     builder (3.2.4)
     concurrent-ruby (1.1.10)
     crass (1.0.6)
+    database_cleaner (2.0.1)
+      database_cleaner-active_record (~> 2.0.0)
+    database_cleaner-active_record (2.0.1)
+      activerecord (>= 5.a)
+      database_cleaner-core (~> 2.0.0)
+    database_cleaner-core (2.0.1)
     date (3.3.3)
     diff-lcs (1.5.0)
     domain_name (0.5.20190701)
@@ -129,7 +143,6 @@ GEM
       mime-types-data (~> 3.2015)
     mime-types-data (3.2022.0105)
     mini_mime (1.1.2)
-    mini_portile2 (2.8.1)
     minitest (5.17.0)
     msgpack (1.6.0)
     net-imap (0.3.4)
@@ -143,8 +156,7 @@ GEM
       net-protocol
     netrc (0.11.0)
     nio4r (2.5.8)
-    nokogiri (1.14.0)
-      mini_portile2 (~> 2.8.0)
+    nokogiri (1.14.0-arm64-darwin)
       racc (~> 1.4)
     pagy (6.0.1)
     pg (1.4.5)
@@ -181,6 +193,8 @@ GEM
       thor (~> 1.0)
       zeitwerk (~> 2.5)
     rake (13.0.6)
+    request_store (1.5.1)
+      rack (>= 1.4)
     rest-client (2.1.0)
       http-accept (>= 1.7.0, < 2.0)
       http-cookie (>= 1.0.2, < 2.0)
@@ -222,13 +236,15 @@ GEM
     zeitwerk (2.6.6)
 
 PLATFORMS
-  ruby
+  arm64-darwin-22
 
 DEPENDENCIES
   allowable
+  audited!
   aws-sdk-s3
   blueprinter
   bootsnap
+  database_cleaner
   dotenv-rails
   factory_bot_rails
   faker
@@ -247,4 +263,4 @@ RUBY VERSION
    ruby 3.0.3p0
 
 BUNDLED WITH
-   2.3.7
+   2.4.9
