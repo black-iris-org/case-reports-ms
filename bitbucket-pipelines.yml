@@ -114,7 +114,7 @@ definitions:
     REMOTE_COMMANDS=$(cat <<SCRIPT
     set -e
     mkdir -p case-reports-ms && cd case-reports-ms
-    echo "$(cat .docker/docker-compose.pipeline.yml | base64)" | base64 --decode > docker-compose.yml
+    echo "$(cat .docker/docker-compose.server.yml | base64)" | base64 --decode > docker-compose.yml
     echo "$ENV_FILE" | base64 --decode > .env
     cat <<UP_COMMAND > up.sh
     sudo TAG=${IMAGE_TAG} docker compose pull
