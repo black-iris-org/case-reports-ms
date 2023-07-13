@@ -8,7 +8,7 @@ class CaseReport < ApplicationRecord
     incident_address: [:name, lat_lng: { coordinates: [] }],
     content:          {}
   }.freeze
-  PRIMITIVE_COLUMNS = (column_names - JSONB_COLUMNS.keys.map(&:to_s)).freeze
+  PRIMITIVE_COLUMNS = (column_names - ['id'] - JSONB_COLUMNS.keys.map(&:to_s)).freeze
 
   has_many :report_audits, foreign_key: :auditable_id
 

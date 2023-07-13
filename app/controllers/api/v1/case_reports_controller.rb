@@ -17,7 +17,7 @@ class Api::V1::CaseReportsController < ApplicationController
   end
 
   def create
-    @case_report = CaseReport.create!(create_params.except(:id))
+    @case_report = CaseReport.create!(create_params)
     render json: V1::CaseReportSerializer.render(
       @case_report,
       root: :case_report,
