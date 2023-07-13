@@ -27,10 +27,9 @@ class Api::V2::RevisionsController < ApplicationController
   private
 
   def set_view_name
-    @view = params[:view]&.to_sym || :revision_view
+    @view = (params[:view] && params[:view].to_sym) || :revision_view
   end
 
-  private
 
   def set_case_reports
     @case_reports = CaseReport.filter_records(filtration_params)
