@@ -14,6 +14,8 @@ gem "puma", "~> 5.0"
 
 gem 'allowable'
 
+gem 'newrelic_rpm'
+
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 # gem "jbuilder"
 

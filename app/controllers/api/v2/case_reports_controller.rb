@@ -17,15 +17,8 @@ class Api::V2::CaseReportsController < ApplicationController
   end
 
   def create
-    begin
     @case_report = CaseReport.create!(create_params)
     render json: V2::CaseReportSerializer.render(@case_report, root: :case_report, **serializer_options)
-    rescue Exception => e
-      trace = ""
-      e.backtrace.each { |line| trace += line + "\n" }
-      trace + "\n\n ==========================" + e.message
-      render json: {error: trace}, status: 500
-    end
   end
 
   def update
