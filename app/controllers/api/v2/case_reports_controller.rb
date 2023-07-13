@@ -33,19 +33,20 @@ class Api::V2::CaseReportsController < ApplicationController
   private
 
   def create_params
-    params.require(:case_report).permit(:incident_number, :incident_at, :incident_id).merge(
-      datacenter_id:   requester_datacenter,
-      datacenter_name: requester_datacenter_name,
-    ).merge params.require(:case_report).permit(*revision_attributes)
-                  .merge(user_id: requester_id, files_attributes: files_attributes)
-
+    params.require(:case_report)
+          .permit(:incident_number, :incident_at, :incident_id, *revision_attributes)
+          .merge(user_id:          requester_id,
+                 files_attributes: files_attributes,
+                 datacenter_id:    requester_datacenter,
+                 datacenter_name:  requester_datacenter_name,
+          )
   end
 
   def update_params
-    {
+    revision_params.merge(
       datacenter_id:   requester_datacenter,
       datacenter_name: requester_datacenter_name
-    }.merge(revision_params)
+    )
   end
 
   def revision_attributes
