@@ -1,5 +1,6 @@
 options:
   docker: true
+  max-time: 15 # configure default 15 minute timeout
 
 definitions:
   services:
@@ -16,6 +17,14 @@ definitions:
         MINIO_ROOT_USER: access_key
         MINIO_ROOT_PASSWORD: secret_key
 
+  caches:
+    bundler-cache:
+      key:
+        files:
+          - Gemfile.lock
+          - "**/*.gemspec"
+      path: vendor/bundle
+
   steps:
     - step: &prepare_variables
         id: prepare_variables
@@ -27,27 +36,27 @@ definitions:
           - set -e
           - IMAGE_NAME=docker.io/$DOCKER_USERNAME/$DOCKER_IMAGE_NAME
           - IMAGE_TAG=${BITBUCKET_BRANCH//\//_}
-          - echo "IMAGE_NAME=$IMAGE_NAME" >> variables.txt
-          - echo "IMAGE_TAG=$IMAGE_TAG" >> variables.txt
+          - echo "export IMAGE_NAME=$IMAGE_NAME" >> variables.txt
+          - echo "export IMAGE_TAG=$IMAGE_TAG" >> variables.txt
         artifacts:
           - variables.txt
 
     - step: &build_docker_image
         id: build_docker_image
+        size: 2x
         name: Build Docker Image
         script:
           - set -e
           - source variables.txt
           - export DOCKER_BUILDKIT=1
           - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-          - |
-            docker build \
-            --build-arg BUILDKIT_INLINE_CACHE=1 \
-            --cache-from $IMAGE_NAME:staging \
-            -t $IMAGE_NAME:$IMAGE_TAG .
+          - ./.docker/build-base.sh
+          - ./.docker/build-app-image.sh
+          - ./.docker/copy-bundle-cache.sh
           - docker save --output image.docker $IMAGE_NAME:$IMAGE_TAG
         caches:
           - docker
+          - bundler-cache
         depends_on:
           - prepare_variables
         artifacts:
@@ -85,10 +94,8 @@ definitions:
           - |
             docker run --env-file=.env \
                        --add-host host.docker.internal:$BITBUCKET_DOCKER_HOST_INTERNAL \
-                       --rm $IMAGE_NAME:$IMAGE_TAG \
-                       bash -c "rails db:create db:schema:load && bundle exec rspec"
-        caches:
-          - docker
+                       $IMAGE_NAME:$IMAGE_TAG \
+                       bash -c "bundle exec rails db:create db:schema:load && bundle exec rspec"
         services:
           - postgres
           - minio
@@ -150,6 +157,8 @@ pipelines:
             - prepare_variables
             - build_docker_image
             - test
+          artifacts:
+            - variables.txt
           script:
             - echo "Deploying to $BITBUCKET_DEPLOYMENT_ENVIRONMENT server..."
             - *deploy_commands
