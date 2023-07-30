@@ -4,7 +4,7 @@ options:
 definitions:
   services:
     postgres:
-      image: postgres:15.1-alpine
+      image: postgis/postgis:10-2.5-alpine
       memory: 512
       environment:
         POSTGRES_USER: db
