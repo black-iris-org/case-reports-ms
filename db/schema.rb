@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_05_21_163552) do
+ActiveRecord::Schema[7.0].define(version: 2023_07_23_192156) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -85,27 +85,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_21_163552) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "old_audits", force: :cascade do |t|
-    t.bigint "revision_id"
-    t.integer "user_id"
-    t.string "user_name"
-    t.string "user_type"
-    t.integer "action", limit: 2
-    t.datetime "action_at", default: -> { "CURRENT_TIMESTAMP" }
-    t.string "first_name"
-    t.string "last_name"
-    t.index ["revision_id"], name: "index_old_audits_on_revision_id"
-  end
-
-  create_table "old_case_reports", force: :cascade do |t|
-    t.integer "incident_number"
-    t.datetime "incident_at", default: -> { "CURRENT_TIMESTAMP" }
-    t.integer "datacenter_id", null: false
-    t.integer "incident_id", null: false
-    t.string "datacenter_name", default: "", null: false
-    t.index ["incident_id"], name: "index_old_case_reports_on_incident_id"
-  end
-
   create_table "report_attachments", force: :cascade do |t|
     t.bigint "audit_id", null: false
     t.datetime "created_at", null: false
@@ -113,54 +92,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_21_163552) do
     t.index ["audit_id"], name: "index_report_attachments_on_audit_id"
   end
 
-  create_table "revisions", force: :cascade do |t|
-    t.bigint "case_report_id"
-    t.integer "user_id"
-    t.string "responder_name"
-    t.string "patient_name"
-    t.date "patient_dob"
-    t.jsonb "incident_address", default: "{}"
-    t.jsonb "content", default: "{}"
-    t.string "name", null: false
-    t.index ["case_report_id"], name: "index_revisions_on_case_report_id"
-  end
-
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "old_audits", "revisions"
   add_foreign_key "report_attachments", "audits"
-  add_foreign_key "revisions", "old_case_reports", column: "case_report_id"
-
-  create_view "case_reports_view", sql_definition: <<-SQL
-      WITH recent_revisions AS (
-           SELECT DISTINCT ON (revisions.case_report_id) revisions.case_report_id,
-              revisions.id,
-              revisions.name,
-              revisions.user_id
-             FROM revisions
-            ORDER BY revisions.case_report_id, revisions.id DESC
-          ), counts AS (
-           SELECT revisions.case_report_id,
-              count(*) AS revisions_count
-             FROM revisions
-            GROUP BY revisions.case_report_id
-          )
-   SELECT old_case_reports.id,
-      old_case_reports.incident_number,
-      old_case_reports.incident_id,
-      old_case_reports.incident_at,
-      old_case_reports.datacenter_id,
-      old_case_reports.datacenter_name,
-      recent_revisions.name,
-      recent_revisions.id AS revision_id,
-      recent_revisions.user_id,
-      counts.revisions_count,
-          CASE
-              WHEN (counts.revisions_count = 1) THEN 0
-              ELSE 1
-          END AS report_type
-     FROM ((old_case_reports
-       JOIN recent_revisions ON ((old_case_reports.id = recent_revisions.case_report_id)))
-       JOIN counts ON ((old_case_reports.id = counts.case_report_id)));
-  SQL
 end
