@@ -28,7 +28,8 @@ module CaseReport::FilesConcern
           filename:     file.filename.to_s,
           byte_size:    file.byte_size,
           content_type: file.content_type,
-          url:          file.service&.send(:object_for, file.key)&.presigned_url(:get)
+          url:          file.service&.send(:object_for, file.key)&.presigned_url(:get),
+          public_url:      file.service&.send(:object_for, file.key)&.public_url
         }
       end || []
     end
