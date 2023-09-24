@@ -29,7 +29,7 @@ module CaseReport::FilesConcern
           byte_size:    file.byte_size,
           content_type: file.content_type,
           url:          file.service&.send(:object_for, file.key)&.presigned_url(:get),
-          public_url:      file.service&.send(:object_for, file.key)&.public_url
+          public_url:   file.service&.send(:object_for, file.key)&.public_url
         }
       end || []
     end
@@ -42,18 +42,22 @@ module CaseReport::FilesConcern
       end
     end
 
-    def files
-      audit.files
-    end
-
     private
 
     def set_report_attachment
       audit = yield
-      return unless audit.auditable_action?
 
-      audit.report_attachment = @report_attachment
-      @report_attachment      = nil
+      case audit.action
+      when 'create', 'update'
+        audit.report_attachment = @report_attachment
+        @report_attachment      = nil
+      else
+        # Attach the original files to the new audit's report_attachment
+        audit.report_attachment ||= ReportAttachment.new
+        audits.modifies.last.report_attachment.files.each do |file|
+          audit.report_attachment.files << file.dup
+        end
+      end
     end
   end
 
