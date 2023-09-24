@@ -176,12 +176,12 @@ RSpec.describe Api::V2::CaseReportsController, type: :request do
     context 'attachments' do
       let!(:report) { FactoryBot.create(:case_report, with_sample_attachment: true) }
 
-      before do
-        put "/api/v2/case_reports/#{report.id}", params: params, headers: headers
-        report.reload
-      end
-
       context 'resetting attachments' do
+        before do # resetting attachments
+          put "/api/v2/case_reports/#{report.id}", params: params, headers: headers
+          report.reload
+        end
+
         let(:params) { { case_report: valid_attributes_2.merge(files_attributes: [attachment_attributes_1]) } }
 
         it 'should reset files attachments' do
@@ -194,6 +194,11 @@ RSpec.describe Api::V2::CaseReportsController, type: :request do
       end
 
       context 'adding attachments' do
+        before do # adding attachments
+          put "/api/v2/case_reports/#{report.id}", params: params, headers: headers
+          report.reload
+        end
+
         let(:params) { { case_report: valid_attributes_2.merge(add_files_attributes: [attachment_attributes_1]) } }
 
         it 'should add new attachment to the new revision' do
@@ -205,7 +210,29 @@ RSpec.describe Api::V2::CaseReportsController, type: :request do
         end
       end
 
+      context 'multi audit effect on attachments' do
+
+        it 'attachments should not be affected by adding show/download audits' do
+          # add show audit 1st time
+          get "/api/v2/case_reports/#{report.id}", headers: headers
+          expect(report.reload.files_blobs.pluck(:filename)).to eq(['test-sample'])
+
+          # add download audit
+          post "/api/v2/audits", headers: headers, params: { audit: { action: 'download', case_report_id: report.id } }
+          expect(report.reload.files_blobs.pluck(:filename)).to eq(['test-sample'])
+
+          # add show audit 1st time
+          get "/api/v2/case_reports/#{report.id}", headers: headers
+          expect(report.reload.files_blobs.pluck(:filename)).to eq(['test-sample'])
+        end
+      end
+
       context 'removing attachments' do
+        before do # removing attachments
+          put "/api/v2/case_reports/#{report.id}", params: params, headers: headers
+          report.reload
+        end
+
         let(:params) { { case_report: valid_attributes_2.merge(remove_files_attributes: ['test-sample']) } }
 
         it 'should add new attachment to the new revision' do
