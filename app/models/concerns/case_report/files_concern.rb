@@ -52,9 +52,12 @@ module CaseReport::FilesConcern
         audit.report_attachment = @report_attachment
         @report_attachment      = nil
       else
-        # Attach the original files to the new audit's report_attachment
+        last_report_attachment = audits.modifies.last.report_attachment
+        return unless last_report_attachment.present?
+
+        # Attach the last files to the new audit's report_attachment
         audit.report_attachment ||= ReportAttachment.new
-        audits.modifies.last.report_attachment.files.each do |file|
+        last_report_attachment.files.each do |file|
           audit.report_attachment.files << file.dup
         end
       end
