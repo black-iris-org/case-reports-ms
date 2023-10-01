@@ -4,9 +4,9 @@ class Api::V2::CaseReportsController < ApplicationController
   include FiltrationConcern
 
   before_action :perform_authorization, only: [:index]
+  before_action :set_audit_additional_data, only: [:create, :show, :update]
   before_action :set_case_reports, only: [:show, :update, :index]
   before_action :set_case_report, only: [:show, :update]
-  before_action :set_audit_additional_data, only: [:create, :show, :update], unless: :skip_audit?
 
   def index
     render json: V2::CaseReportSerializer.render(
