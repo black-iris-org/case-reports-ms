@@ -142,14 +142,13 @@ jobs:
           AWS_BUCKET_NAME=beacon-uploads-staging
           AWS_BUCKET=beacon-uploads-staging
           AWS_REGION=us-east-1
-          S3_ENDPOINT=http://localhost:9001
+          S3_ENDPOINT=http://minio:9001
           IMAGE_NAME=$IMAGE_NAME
           IMAGE_TAG=$IMAGE_TAG
           ENV
 
       - name: Run Tests
         run: |
-          docker run --env-file .env -e PGHOST=postgres -e S3_ENDPOINT=http://minio:9001 \
-               --network case-reports-ms_default \
+          docker run --env-file .env \
                $IMAGE_NAME:$IMAGE_TAG \
                bash -c "bundle exec rails db:create db:schema:load && bundle exec rspec"
