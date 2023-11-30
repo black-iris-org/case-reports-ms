@@ -149,6 +149,7 @@ jobs:
 
       - name: Run Tests
         run: |
+          source variables.txt
           echo $IMAGE_NAME:$IMAGE_TAG
           docker run --env-file .env \
                $IMAGE_NAME:$IMAGE_TAG \
