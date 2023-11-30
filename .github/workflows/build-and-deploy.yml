@@ -149,6 +149,7 @@ jobs:
 
       - name: Run Tests
         run: |
+          echo $IMAGE_NAME:$IMAGE_TAG
           docker run --env-file .env \
                $IMAGE_NAME:$IMAGE_TAG \
                bash -c "bundle exec rails db:create db:schema:load && bundle exec rspec"
