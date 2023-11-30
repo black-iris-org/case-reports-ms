@@ -1,6 +1,11 @@
 name: Case Reports Build and Deployment
 
-on: [pull_request]
+on:
+  workflow_dispatch:
+  push:
+    branches: [ develop, master ]
+  pull_request:
+    branches: [ develop ]
 
 jobs:
   build:
