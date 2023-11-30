@@ -118,6 +118,12 @@ jobs:
       - name: Load Docker Image
         run: docker load --input ./image.docker
 
+      - name: Download Variables Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: variables
+          path: ./
+
       - name: Create .env File
         run: |
           cat <<ENV > .env
@@ -137,6 +143,8 @@ jobs:
           AWS_BUCKET=beacon-uploads-staging
           AWS_REGION=us-east-1
           S3_ENDPOINT=http://localhost:9001
+          IMAGE_NAME=$IMAGE_NAME
+          IMAGE_TAG=$IMAGE_TAG
           ENV
 
       - name: Run Tests
