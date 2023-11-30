@@ -102,6 +102,8 @@ jobs:
           POSTGRES_PASSWORD: secret
       minio:
         image: satantime/minio-server
+        ports:
+          - '9001:9000'
         env:
           MINIO_ACCESS_KEY: access_key
           MINIO_SECRET_KEY: secret_key
@@ -134,12 +136,12 @@ jobs:
           AWS_BUCKET_NAME=beacon-uploads-staging
           AWS_BUCKET=beacon-uploads-staging
           AWS_REGION=us-east-1
-          S3_ENDPOINT=http://localhost:9000
+          S3_ENDPOINT=http://localhost:9001
           ENV
 
       - name: Run Tests
         run: |
-          docker run --env-file=.env -e PGHOST=postgres -e S3_ENDPOINT=http://minio:9000 \
+          docker run --env-file=.env -e PGHOST=postgres -e S3_ENDPOINT=http://minio:9001 \
                      --network container:postgres --network container:minio \
                      $IMAGE_NAME:$IMAGE_TAG \
                      bash -c "bundle exec rails db:create db:schema:load && bundle exec rspec"
