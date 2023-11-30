@@ -1,0 +1,83 @@
+name: Case Reports Build and Deployment
+
+on: [pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgis/postgis:10-2.5-alpine
+        env:
+          POSTGRES_USER: db
+          POSTGRES_DB: db
+          POSTGRES_PASSWORD: secret
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      minio:
+        image: satantime/minio-server
+        env:
+          MINIO_ROOT_USER: access_key
+          MINIO_ROOT_PASSWORD: secret_key
+
+    steps:
+      - name: Prepare Variables
+        env:
+          DOCKER_IMAGE_NAME: case-reports-ms
+        run: |
+          set -e
+          IMAGE_NAME=docker.io/${{secrets.DOCKER_USERNAME}}/$DOCKER_IMAGE_NAME
+          IMAGE_TAG=${GITHUB_REF_NAME//\//_}
+          echo "export IMAGE_NAME=$IMAGE_NAME" >> variables.txt
+          echo "export IMAGE_TAG=$IMAGE_TAG" >> variables.txt
+          cat variables.txt
+
+      - name: Upload Variables Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: variables
+          path: variables.txt
+
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Download Variables Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: variables
+          path: variables.txt
+
+      - name: Build Docker Image
+        run: |
+          set -e
+          source variables.txt
+          export DOCKER_BUILDKIT=1
+          echo ${{secrets.DOCKER_PASSWORD}} | docker login -u ${{secrets.DOCKER_USERNAME}} --password-stdin
+          ./.docker/build-base.sh
+          ./.docker/build-app-image.sh
+          ./.docker/copy-bundle-cache.sh
+          docker save --output image.docker $IMAGE_NAME:$IMAGE_TAG
+
+      - name: Cache Docker Layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Cache Bundle Dependencies
+        uses: actions/cache@v2
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock', '**/*.gemspec') }}
+
+      - name: Upload Docker Image Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: docker-image
+          path: image.docker
