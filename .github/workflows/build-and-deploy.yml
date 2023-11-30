@@ -86,3 +86,60 @@ jobs:
         with:
           name: docker-image
           path: image.docker
+
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15.1-alpine
+        ports:
+          - '9000:5432'
+        env:
+          POSTGRES_USER: db
+          POSTGRES_DB: db
+          POSTGRES_PASSWORD: secret
+      minio:
+        image: satantime/minio-server
+        env:
+          MINIO_ACCESS_KEY: access_key
+          MINIO_SECRET_KEY: secret_key
+
+    steps:
+      - name: Download Docker Image Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: docker-image
+          path: ./
+
+      - name: Load Docker Image
+        run: docker load --input ./image.docker
+
+      - name: Create .env File
+        run: |
+          cat <<ENV > .env
+          RAILS_ENV=test
+          PGDATABASE=db
+          PGUSER=db
+          PGPASSWORD=secret
+          PGHOST=localhost
+          DB_USER=db
+          DB_HOST=localhost
+          DB_PORT=5432
+          DB_PASSWORD=secret
+          AWS_ACCESS_KEY_ID=access_key
+          AWS_SECRET_ACCESS_KEY=secret_key
+          AWS_DEFAULT_REGION=us-east-1
+          AWS_BUCKET_NAME=beacon-uploads-staging
+          AWS_BUCKET=beacon-uploads-staging
+          AWS_REGION=us-east-1
+          S3_ENDPOINT=http://localhost:9000
+          ENV
+
+      - name: Run Tests
+        run: |
+          docker run --env-file=.env -e PGHOST=postgres -e S3_ENDPOINT=http://minio:9000 \
+                     --network container:postgres --network container:minio \
+                     $IMAGE_NAME:$IMAGE_TAG \
+                     bash -c "bundle exec rails db:create db:schema:load && bundle exec rspec"
