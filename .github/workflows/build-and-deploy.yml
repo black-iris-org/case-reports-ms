@@ -131,7 +131,7 @@ jobs:
           PGDATABASE=db
           PGUSER=db
           PGPASSWORD=secret
-          PGHOST=localhost
+          PGHOST=postgres
           DB_USER=db
           DB_HOST=localhost
           DB_PORT=5432
@@ -149,7 +149,6 @@ jobs:
 
       - name: Run Tests
         run: |
-          docker run --env-file .env -e PGHOST=postgres \
-               --network case-reports-ms_default \
+          docker run --env-file .env\
                $IMAGE_NAME:$IMAGE_TAG \
                bash -c "bundle exec rails db:create db:schema:load && bundle exec rspec"
