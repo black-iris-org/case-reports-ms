@@ -94,7 +94,7 @@ jobs:
     env:
       DATABASE_USER: db
       DATABASE_PASSWORD: secret
-      DATABASE_HOST: postgres
+      DATABASE_HOST: postgresdfg
       DATABASE_PORT: 5432
     services:
       postgres:
