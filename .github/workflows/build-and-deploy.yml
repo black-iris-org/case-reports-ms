@@ -91,6 +91,11 @@ jobs:
   test:
     needs: build
     runs-on: ubuntu-latest
+    env:
+      DATABASE_USER: db
+      DATABASE_PASSWORD: secret
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
     services:
       postgres:
         image: postgres:15.1-alpine
