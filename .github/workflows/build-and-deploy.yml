@@ -152,6 +152,6 @@ jobs:
           set -e
           source variables.txt
           docker run --env-file .env\
-               --network case-reports-ms_default \
+               --network "host" \
                $IMAGE_NAME:$IMAGE_TAG \
                bash -c "bundle exec rails db:create db:schema:load && bundle exec rspec"
