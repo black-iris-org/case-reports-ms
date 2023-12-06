@@ -94,7 +94,7 @@ jobs:
     env:
       DATABASE_USER: db
       DATABASE_PASSWORD: secret
-      DATABASE_HOST: postgresdfg
+      DATABASE_HOST: postgres
       DATABASE_PORT: 5432
     services:
       postgres:
@@ -140,6 +140,7 @@ jobs:
           DB_USER=db
           DB_HOST=localhost
           DB_PORT=9000
+          DATABASE_PORT=9000
           DB_PASSWORD=secret
           AWS_ACCESS_KEY_ID=access_key
           AWS_SECRET_ACCESS_KEY=secret_key
