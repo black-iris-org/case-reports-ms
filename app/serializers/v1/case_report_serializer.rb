@@ -1,7 +1,7 @@
 class V1::CaseReportSerializer < ApplicationSerializer
   identifier :id
   fields :datacenter_id, :datacenter_name, :incident_number, :incident_id, :incident_at, :incident_number,
-         :revisions_count, :report_type, :user_id, :attachments
+         :revisions_count, :report_type, :user_id, :attachments, :case_report_user_id
 
   # Other Views
   view :list_view do
