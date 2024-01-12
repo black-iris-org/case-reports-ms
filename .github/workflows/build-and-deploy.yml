@@ -98,9 +98,10 @@ jobs:
 
       - name: Push Docker image
         run: |
+          set -e
+          source variables.txt
           docker push $IMAGE_NAME:$IMAGE_TAG
-
-
+          
   test:
     needs: build
     runs-on: ubuntu-latest
