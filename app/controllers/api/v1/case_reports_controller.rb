@@ -44,7 +44,7 @@ class Api::V1::CaseReportsController < ApplicationController
 
   def create_params
     params.require(:case_report)
-          .permit(:incident_number, :incident_at, :incident_id, *revision_attributes)
+          .permit(:case_report_user_id, :incident_number, :incident_at, :incident_id, *revision_attributes)
           .merge(user_id:          requester_id,
                  files_attributes: files_attributes,
                  datacenter_id:    requester_datacenter,

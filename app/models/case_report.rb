@@ -19,7 +19,7 @@ class CaseReport < ApplicationRecord
   enum report_type: [:original, :amended]
 
   attr_readonly :revisions_count, :report_type, :incident_number, :incident_at, :datacenter_id,
-                :datacenter_name, :incident_id
+                :datacenter_name, :incident_id, :case_report_user_id
 
   serialize :incident_address, Serializers::IndifferentHash
   serialize :content, Serializers::IndifferentHash
