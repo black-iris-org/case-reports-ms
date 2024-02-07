@@ -3,7 +3,7 @@ name: Case Reports Build and Deployment
 on:
   workflow_dispatch:
   push:
-    branches: [ develop, master ]
+    branches: [ develop, main ]
   pull_request:
     branches: [ develop ]
 
