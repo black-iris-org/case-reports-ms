@@ -4,9 +4,9 @@ class Api::V1::CaseReportsController < ApplicationController
   include FiltrationConcern
 
   before_action :perform_authorization, only: [:index]
-  before_action :set_case_reports, only: [:show, :update, :index]
-  before_action :set_case_report, only: [:show, :update]
-  before_action :set_audit_additional_data, only: [:create, :show, :update], unless: :skip_audit?
+  before_action :set_case_reports, only: [:show, :update, :index, :attachments]
+  before_action :set_case_report, only: [:show, :update, :attachments]
+  before_action :set_audit_additional_data, only: [:create, :show, :update, :attachments], unless: :skip_audit?
 
   def index
     render json: V1::CaseReportSerializer.render(
@@ -39,6 +39,15 @@ class Api::V1::CaseReportsController < ApplicationController
   def show
     render json: V1::CaseReportSerializer.render(@case_report, root: :case_report, view: :show_view)
   end
+
+  def attachments
+    render json: V1::CaseReportSerializer.render(
+      @case_report,
+      root: nil,
+      view: :pdf_attachments_view
+    )
+  end
+
 
   private
 

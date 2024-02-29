@@ -43,6 +43,26 @@ class CaseReport < ApplicationRecord
     super || audit&.created_at
   end
 
+
+  def pdf_attachments
+    all_attachments = []
+
+    content = self.content
+
+    assesment_attachments = content[:assesment] && content[:assesment][:attachments] ? content[:assesment][:attachments].select { |attachment| attachment["content_type"] == "application/pdf" } : []
+    file_attributes_attachments = content[:assesment] && content[:assesment][:files_attributes] ? content[:assesment][:files_attributes].select { |attachment| attachment["content_type"] == "application/pdf" } : []
+    add_file_attributes_attachments = content[:assesment] && content[:assesment][:add_files_attributes] ? content[:assesment][:add_files_attributes].select { |attachment| attachment["content_type"] == "application/pdf" } : []
+
+    all_attachments.concat(assesment_attachments)
+    all_attachments.concat(file_attributes_attachments)
+    all_attachments.concat(add_file_attributes_attachments)
+    all_attachments.uniq
+  end
+
+  def has_attachments?
+    pdf_attachments.present?
+  end
+  
   private
 
   def set_defaults
