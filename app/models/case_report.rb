@@ -61,7 +61,12 @@ class CaseReport < ApplicationRecord
   end
 
   def has_attachments?
-    pdf_attachments.present?
+    pdf_attachments.present? || self.only_pdf_attachments.present?
+  end
+
+  # Or should I get these from Beacon by filtering user_id?
+  def created_by
+    self.content["creator"]["first_name"] + " " + self.content["creator"]["last_name"]
   end
   
   private
