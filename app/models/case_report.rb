@@ -46,13 +46,14 @@ class CaseReport < ApplicationRecord
 
   def pdf_attachments
     all_attachments = []
-
+    attachments = self.attachments ? self.attachments.select { |attachment| attachment["content_type"] == "application/pdf" } : []
     content = self.content
 
     assesment_attachments = content[:assesment] && content[:assesment][:attachments] ? content[:assesment][:attachments].select { |attachment| attachment["content_type"] == "application/pdf" } : []
     file_attributes_attachments = content[:assesment] && content[:assesment][:files_attributes] ? content[:assesment][:files_attributes].select { |attachment| attachment["content_type"] == "application/pdf" } : []
     add_file_attributes_attachments = content[:assesment] && content[:assesment][:add_files_attributes] ? content[:assesment][:add_files_attributes].select { |attachment| attachment["content_type"] == "application/pdf" } : []
 
+    all_attachments.concat(attachments)
     all_attachments.concat(assesment_attachments)
     all_attachments.concat(file_attributes_attachments)
     all_attachments.concat(add_file_attributes_attachments)
