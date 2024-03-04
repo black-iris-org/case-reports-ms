@@ -8,6 +8,9 @@ class V1::CaseReportSerializer < ApplicationSerializer
     excludes :attachments
     association(:revision, blueprint: ::V1::RevisionSerializer, view: :minimal) { |report| report }
     association :revisions, blueprint: ::V1::RevisionSerializer, view: :minimal
+    field :pdf_attachments_count do |case_report, _options|
+      case_report.pdf_attachments.count
+    end
   end
 
   view :show_view do
