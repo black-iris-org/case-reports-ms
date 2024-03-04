@@ -11,6 +11,9 @@ class V1::CaseReportSerializer < ApplicationSerializer
     field :has_attachments do |case_report, _options|
       case_report.has_attachments?
     end
+    field :pdf_attachments_count do |case_report, _options|
+      case_report.pdf_attachments.count
+    end
   end
 
   view :show_view do
@@ -21,9 +24,5 @@ class V1::CaseReportSerializer < ApplicationSerializer
     association :revisions, blueprint: ::V1::RevisionSerializer, view: :minimal do |_, options|
       options[:revisions]
     end
-  end
-
-  field :has_attachments do |case_report, _options|
-    case_report.has_attachments?
   end
 end

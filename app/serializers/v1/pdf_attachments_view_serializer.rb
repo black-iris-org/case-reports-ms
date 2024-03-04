@@ -1,3 +1,3 @@
 class V1::PdfAttachmentsViewSerializer < ApplicationSerializer
-  attributes :only_pdf_attachments, :created_by
+  fields :only_pdf_attachments, :created_by, :id, :user_id
 end
