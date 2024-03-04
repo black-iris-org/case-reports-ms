@@ -9,7 +9,7 @@ class Api::V1::CaseReportsController < ApplicationController
   before_action :set_audit_additional_data, only: [:create, :show, :update, :attachments], unless: :skip_audit?
 
   def index
-    render json: V1::CaseReportSerializer.render(
+    render json: V1::PdfAttachmentsViewSerializer.render(
       paginate(@case_reports),
       root: :case_reports, meta: pagination_status,
       view: :list_view
