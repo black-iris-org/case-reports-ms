@@ -31,7 +31,7 @@ module CaseReport::FilesConcern
           url:          file.service&.send(:object_for, file.key)&.presigned_url(:get),
           public_url:   file.service&.send(:object_for, file.key)&.public_url,
           checksum:     file.checksum,
-          created_at:   file.created_at,
+          created_at:   file.created_at
         }
       end || []
     end
