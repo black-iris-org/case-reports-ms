@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   namespace :api, defaults: { format: :json } do
     namespace :v1 do
       resources :case_reports, only: [:create, :show, :update, :index] do
+        get :incident_reports_counts, on: :collection
         member do
           get 'attachments'
         end

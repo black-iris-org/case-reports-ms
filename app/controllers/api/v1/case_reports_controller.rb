@@ -46,6 +46,13 @@ class Api::V1::CaseReportsController < ApplicationController
     )
   end
 
+  def incident_reports_counts
+    incident_id = params[:incident_id]
+    case_reports_count = CaseReport.where(incident_id: incident_id).count
+    # revisions_count = Revision.joins(:case_report).where(case_reports: { incident_id: incident_id }).count
+    render json: { incident_id: incident_id, case_reports_count: case_reports_count, revisions_count: 0 }
+  end
+
 
   private
 
