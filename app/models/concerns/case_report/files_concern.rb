@@ -50,6 +50,7 @@ module CaseReport::FilesConcern
     end
 
     def audit
+      Rails.logger.info "Getting audit"
       if audit_version.present?
         audits.order(created_at: :desc).find_by(version: audit_version)
       else
@@ -60,8 +61,10 @@ module CaseReport::FilesConcern
     private
 
     def set_report_attachment
+      Rails.logger.info "Setting report attachment"
       audit = yield
-
+      Rails.logger.info "Finished Yielding"
+      Rails.logger.info "Audit: #{audit.inspect}"
       case audit.action
       when 'create', 'update'
         audit.report_attachment = @report_attachment
