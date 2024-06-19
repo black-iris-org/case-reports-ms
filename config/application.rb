@@ -23,6 +23,13 @@ module CaseReportMs
     # Only loads a smaller set of middleware suitable for API only apps.
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
-    config.api_only = true
+    #
+    # Ensure the default encoding is set to UTF-8
+    config.encoding = "utf-8"
+    config.i18n.default_locale = :en
+    config.i18n.fallbacks = true
+
+    # Add additional load paths for your own custom dirs
+    config.autoload_paths += %W(#{config.root}/lib)
   end
 end
