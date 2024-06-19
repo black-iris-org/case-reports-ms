@@ -62,7 +62,10 @@ module CaseReport::FilesConcern
 
     def set_report_attachment
       Rails.logger.info "Setting report attachment"
+      old_logger_level = ActiveRecord::Base.logger.level
+      ActiveRecord::Base.logger.level = Logger::DEBUG # Temporarily increase SQL log verbosity
       audit = yield
+      ActiveRecord::Base.logger.level = old_logger_level # Reset log level
       Rails.logger.info "Finished Yielding"
       Rails.logger.info "Audit: #{audit.inspect}"
       case audit.action
