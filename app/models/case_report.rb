@@ -43,6 +43,19 @@ class CaseReport < ApplicationRecord
     super || audit&.created_at
   end
 
+
+  def pdf_attachments
+    self.only_pdf_attachments
+  end
+
+  def has_attachments?
+    self.only_pdf_attachments.present?
+  end
+
+  def created_by
+    self.content["creator"]["first_name"] + " " + self.content["creator"]["last_name"]
+  end
+  
   private
 
   def set_defaults

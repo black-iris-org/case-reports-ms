@@ -4,9 +4,9 @@ class Api::V1::CaseReportsController < ApplicationController
   include FiltrationConcern
 
   before_action :perform_authorization, only: [:index]
-  before_action :set_case_reports, only: [:show, :update, :index]
-  before_action :set_case_report, only: [:show, :update]
-  before_action :set_audit_additional_data, only: [:create, :show, :update], unless: :skip_audit?
+  before_action :set_case_reports, only: [:show, :update, :index, :attachments]
+  before_action :set_case_report, only: [:show, :update, :attachments]
+  before_action :set_audit_additional_data, only: [:create, :show, :update, :attachments], unless: :skip_audit?
 
   def index
     render json: V1::CaseReportSerializer.render(
@@ -39,6 +39,20 @@ class Api::V1::CaseReportsController < ApplicationController
   def show
     render json: V1::CaseReportSerializer.render(@case_report, root: :case_report, view: :show_view)
   end
+
+  def attachments
+    render json: V1::PdfAttachmentsViewSerializer.render(
+      @case_report
+    )
+  end
+
+  def incident_reports_counts
+    incident_id = params[:incident_id]
+    case_reports_count = CaseReport.where(incident_id: incident_id).count
+    revisions_count = CaseReport.where(incident_id: incident_id).sum(&:revisions_count)
+    render json: { incident_id: incident_id, case_reports_count: case_reports_count, revisions_count: revisions_count }
+  end
+
 
   private
 

@@ -28,15 +28,18 @@ module RequesterConcern
     end
 
     def requester_name
-      @requester_name ||= request.headers[REQUESTER_HEADERS[:requester_name]]
+      raw_name = request.headers[REQUESTER_HEADERS[:requester_name]]
+      @requester_name ||= raw_name.force_encoding('UTF-8')
     end
 
     def requester_first_name
-      @requester_first_name ||= request.headers[REQUESTER_HEADERS[:requester_first_name]]
+      raw_name = request.headers[REQUESTER_HEADERS[:requester_first_name]]
+      @requester_first_name ||= raw_name.force_encoding('UTF-8')
     end
 
     def requester_last_name
-      @requester_last_name ||= request.headers[REQUESTER_HEADERS[:requester_last_name]]
+      raw_name = request.headers[REQUESTER_HEADERS[:requester_last_name]]
+      @requester_last_name ||= raw_name.force_encoding('UTF-8')
     end
 
     def requester_datacenter
@@ -44,7 +47,8 @@ module RequesterConcern
     end
 
     def requester_datacenter_name
-      @requester_datacenter_name ||= request.headers[REQUESTER_HEADERS[:requester_datacenter_name]]
+      raw_name = request.headers[REQUESTER_HEADERS[:requester_datacenter_name]]
+      @requester_datacenter_name ||= raw_name.force_encoding('UTF-8')
     end
   end
 end
