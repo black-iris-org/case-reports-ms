@@ -41,7 +41,7 @@ module CaseReport::FilesConcern
         if file.content_type == 'application/pdf'
           {
             filename:     file.filename.to_s,
-            url:          file.service&.send(:object_for, file.key)&.presigned_url(:get),
+            url:          file.service&.send(:object_for, file.key)&.presigned_url(:get, response_content_type: file.content_type),
             public_url:   file.service&.send(:object_for, file.key)&.public_url,
             created_at:   file.created_at
           }
