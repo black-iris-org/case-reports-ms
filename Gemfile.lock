@@ -1,5 +1,5 @@
 GIT
-  remote: https://github.com/shqear93/audited.git
+  remote: https://github.com/trek-medics/audited.git
   revision: 731af5c818d43c4e78c3b6251e96603a163b3a92
   specs:
     audited (5.3.3)
@@ -194,7 +194,7 @@ GEM
       thor (~> 1.0)
       zeitwerk (~> 2.5)
     rake (13.0.6)
-    request_store (1.5.1)
+    request_store (1.7.0)
       rack (>= 1.4)
     rest-client (2.1.0)
       http-accept (>= 1.7.0, < 2.0)
