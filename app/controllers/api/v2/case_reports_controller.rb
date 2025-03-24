@@ -4,8 +4,8 @@ class Api::V2::CaseReportsController < ApplicationController
   include FiltrationConcern
 
   before_action :perform_authorization, only: [:index, :updates]
-  before_action :set_audit_additional_data, only: [:create, :show, :update]
-  before_action :set_case_reports, only: [:show, :update, :index]
+  before_action :set_audit_additional_data, only: [:create, :show, :update, :updates]
+  before_action :set_case_reports, only: [:show, :update, :index, :updates]
   before_action :set_case_report, only: [:show, :update]
 
   def index
@@ -55,10 +55,9 @@ class Api::V2::CaseReportsController < ApplicationController
     limit = (params[:limit] || 100).to_i
     limit = 100 if limit <= 0 || limit > 1000
 
-    # Query for updated case reports
-    case_reports_query = CaseReport.where("created_at >= ?", 10.days.ago)
+    # Query for updated case reports using the @case_reports from the filter
+    case_reports_query = @case_reports.where("created_at >= ?", 10.days.ago)
                                    .where('updated_at > ?', updated_after + 0.000001.seconds)
-                                   .filter_records(auth_params.to_h)
 
     # Order by updated_at and limit results
     case_reports = case_reports_query.order(updated_at: :asc)
