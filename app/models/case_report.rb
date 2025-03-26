@@ -57,6 +57,7 @@ class CaseReport < ApplicationRecord
       self.content["creator"]["first_name"] + " " + self.content["creator"]["last_name"]
     else
       self.responder_name
+    end
   end
   
   private
