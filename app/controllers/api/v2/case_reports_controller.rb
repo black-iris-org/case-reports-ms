@@ -53,7 +53,7 @@ class Api::V2::CaseReportsController < ApplicationController
 
     # Get the limit parameter (default to 100)
     limit = (params[:limit] || 100).to_i
-    limit = 100 if limit <= 0 || limit > 1000
+    limit = 100 if limit <= 0 || limit > 100
 
     # Query for updated case reports using the @case_reports from the filter
     case_reports_query = @case_reports.where("created_at >= ?", 10.days.ago)
@@ -75,7 +75,7 @@ class Api::V2::CaseReportsController < ApplicationController
       status: 'success',
       case_reports: V2::CaseReportSerializer.render_as_hash(
         case_reports,
-        view: :list_view
+        view: :full_details
       )
     }
 
