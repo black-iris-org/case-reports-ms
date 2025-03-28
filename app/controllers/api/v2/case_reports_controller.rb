@@ -57,11 +57,10 @@ class Api::V2::CaseReportsController < ApplicationController
 
     # Query for updated case reports using the @case_reports from the filter
     case_reports_query = @case_reports.where("created_at >= ?", 10.days.ago)
-                                   .where('updated_at > ?', updated_after + 0.000001.seconds)
+                                      .where('updated_at > ?', updated_after + 0.000001.seconds)
 
-    # Order by updated_at and limit results
-    case_reports = case_reports_query.order(updated_at: :asc)
-                                     .limit(limit + 1) # Get one extra to determine if there are more
+    # Limit results (ordering is already set to updated_at: :asc in set_case_reports)
+    case_reports = case_reports_query.limit(limit + 1) # Get one extra to determine if there are more
 
     # Check if there are more results
     has_more = case_reports.size > limit
@@ -155,7 +154,14 @@ class Api::V2::CaseReportsController < ApplicationController
   end
 
   def set_case_reports
-    @case_reports = CaseReport.filter_records(filters.to_h).order(id: :desc)
+    @case_reports = CaseReport.filter_records(filters.to_h)
+    if action_name == 'updates'
+      # For the updates action, we want oldest first for Aselo poller
+      # The specific query in the updates method will further refine this
+      @case_reports = @case_reports.order(updated_at: :asc)
+    else
+      @case_reports = @case_reports.order(id: :desc)
+    end
   end
 
   def serializer_options
