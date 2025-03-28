@@ -32,6 +32,9 @@ Rails.application.routes.draw do
 
     namespace :v2 do
       resources :case_reports, only: [:create, :show, :update, :index] do
+        collection do
+          get :updates
+        end
         resources :revisions, only: [:index, :show]
         resources :audits, only: [:index]
       end

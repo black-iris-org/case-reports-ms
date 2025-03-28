@@ -3,9 +3,9 @@ class Api::V2::CaseReportsController < ApplicationController
   include PaginationConcern
   include FiltrationConcern
 
-  before_action :perform_authorization, only: [:index]
-  before_action :set_audit_additional_data, only: [:create, :show, :update]
-  before_action :set_case_reports, only: [:show, :update, :index]
+  before_action :perform_authorization, only: [:index, :updates]
+  before_action :set_audit_additional_data, only: [:create, :show, :update, :updates]
+  before_action :set_case_reports, only: [:show, :update, :index, :updates]
   before_action :set_case_report, only: [:show, :update]
 
   def index
@@ -28,6 +28,61 @@ class Api::V2::CaseReportsController < ApplicationController
 
   def show
     render json: V2::CaseReportSerializer.render(@case_report, root: :case_report)
+  end
+
+  # Supports Aselo integration API
+  def updates
+    # Ensure required parameters are present
+    unless params[:updated_after].present?
+      render json: { error: 'Missing required parameter: updated_after' }, status: :bad_request
+      return
+    end
+
+    begin
+      # Parse the updated_after timestamp
+      updated_after = Time.zone.parse(params[:updated_after])
+      # Additional validation to ensure we have a valid Time object
+      if updated_after.nil?
+        render json: { error: 'Invalid timestamp format for updated_after' }, status: :bad_request
+        return
+      end
+    rescue ArgumentError, TypeError
+      render json: { error: 'Invalid timestamp format' }, status: :bad_request
+      return
+    end
+
+    # Get the limit parameter (default to 100)
+    limit = (params[:limit] || 100).to_i
+    limit = 100 if limit <= 0 || limit > 100
+
+    # Query for updated case reports using the @case_reports from the filter
+    case_reports_query = @case_reports.where("created_at >= ?", 10.days.ago)
+                                   .where('updated_at > ?', updated_after + 0.000001.seconds)
+
+    # Order by updated_at and limit results
+    case_reports = case_reports_query.order(updated_at: :asc)
+                                     .limit(limit + 1) # Get one extra to determine if there are more
+
+    # Check if there are more results
+    has_more = case_reports.size > limit
+    case_reports = case_reports.first(limit) if has_more
+
+    # Get the next timestamp if there are more results
+    next_timestamp = has_more && case_reports.last ? case_reports.last.updated_at.iso8601 : nil
+
+    # Serialize the case reports
+    response = {
+      status: 'success',
+      case_reports: V2::CaseReportSerializer.render_as_hash(
+        case_reports,
+        view: :full_details
+      )
+    }
+
+    # Add next_timestamp if there are more results
+    response[:next_timestamp] = next_timestamp if next_timestamp
+
+    render json: response, status: :ok
   end
 
   private
