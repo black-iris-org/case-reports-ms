@@ -53,11 +53,7 @@ class CaseReport < ApplicationRecord
   end
 
   def created_by
-    if self.content["creator"].present?
-      self.content["creator"]["first_name"] + " " + self.content["creator"]["last_name"]
-    else
-      self.responder_name
-    end
+    self.responder_name
   end
   
   private
