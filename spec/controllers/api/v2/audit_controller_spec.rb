@@ -92,6 +92,7 @@ RSpec.describe Api::V2::AuditsController, type: :request do
             .to include(
                   "user_id"         => headers[:'Requester-Id'].to_i,
                   "user_name"       => headers[:'Requester-Name'],
+                  "email"       => headers[:'Requester-Email'],
                   "datacenter_name" => headers[:'Requester-Datacenter-Name']
                 )
         end
