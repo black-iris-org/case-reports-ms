@@ -35,6 +35,7 @@ RSpec.describe Api::V2::CaseReportsController, type: :request do
       'Requester-Id':              '1',
       'Requester-Role':            'Admin',
       'Requester-Name':            Faker::Name.name,
+      'Requester-Email':            Faker::Internet.email,
       'Requester-First-Name':      Faker::Name.first_name,
       'Requester-Last-Name':       Faker::Name.last_name,
       'Requester-Datacenter':      '1',
