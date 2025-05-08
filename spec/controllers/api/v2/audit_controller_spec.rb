@@ -13,6 +13,7 @@ RSpec.describe Api::V2::AuditsController, type: :request do
       'Requester-Name':            Faker::Name.name,
       'Requester-First-Name':      Faker::Name.first_name,
       'Requester-Last-Name':       Faker::Name.last_name,
+      'Requester-Email':            Faker::Internet.email,
       'Requester-Datacenter':      '1',
       'Requester-Datacenter-Name': 'test'
     }

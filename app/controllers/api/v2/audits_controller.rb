@@ -33,6 +33,7 @@ class Api::V2::AuditsController < ApplicationController
       user_name:       requester_name,
       user_type:       requester_role,
       user_id:         requester_id,
+      email:           requester_email,
       additional_data: { first_name: requester_first_name, last_name: requester_last_name }
     }
   end

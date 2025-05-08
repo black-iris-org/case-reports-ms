@@ -29,7 +29,7 @@ class Api::V1::AuditsController < ApplicationController
   end
 
   def enforced_audit_params
-    { user_name: requester_name, user_type: requester_role, user_id: requester_id }
+    { user_name: requester_name, user_type: requester_role, user_id: requester_id, email: requester_email }
   end
 
   def index_params
