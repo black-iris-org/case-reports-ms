@@ -55,7 +55,7 @@ gem 'mailgun-ruby'
 # cloud storage & attachments
 gem "aws-sdk-s3"
 
-gem 'audited', github: 'shqear93/audited'
+gem 'audited', github: 'trek-medics/audited'
 
 group :development do
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
