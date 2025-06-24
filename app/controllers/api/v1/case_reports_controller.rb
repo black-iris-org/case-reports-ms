@@ -53,6 +53,18 @@ class Api::V1::CaseReportsController < ApplicationController
     render json: { incident_id: incident_id, case_reports_count: case_reports_count, revisions_count: revisions_count }
   end
 
+  def destroy_by_datacenter
+    datacenter_id = params[:datacenter_id]
+
+    if datacenter_id.blank?
+      render json: { error: 'Missing datacenter_id' }, status: :bad_request and return
+    end
+
+    deleted_count = CaseReport.where(datacenter_id: datacenter_id).delete_all
+
+    render json: { message: "Deleted #{deleted_count} case reports from datacenter #{datacenter_id}" }, status: :ok
+  end
+
 
   private
 
