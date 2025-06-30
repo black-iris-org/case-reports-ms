@@ -57,14 +57,40 @@ class Api::V1::CaseReportsController < ApplicationController
     datacenter_id = params[:datacenter_id]
 
     if datacenter_id.blank?
-      render json: { error: 'Missing datacenter_id' }, status: :bad_request and return
+      return render json: { error: 'Missing datacenter_id' }, status: :bad_request
     end
 
-    deleted_count = CaseReport.where(datacenter_id: datacenter_id).delete_all
+    case_reports = CaseReport.where(datacenter_id: datacenter_id)
+    total = case_reports.size
+    deleted_count = 0
+    attachment_destroyed_count = 0
+    audit_destroyed_count = 0
 
-    render json: { message: "Deleted #{deleted_count} case reports from datacenter #{datacenter_id}" }, status: :ok
+    case_reports.find_each do |report|
+      ReportAudit.where(auditable_id: report.id).each do |audit|
+        if audit.respond_to?(:report_attachment) && audit.report_attachment.present?
+          audit.report_attachment.files.each { |file| file.purge_later } rescue nil
+
+          audit.report_attachment.destroy
+          attachment_destroyed_count += 1
+        end
+      end
+
+      audit_destroyed_count += ReportAudit.where(auditable_id: report.id).delete_all
+    end
+
+    deleted_count = case_reports.delete_all
+
+    render json: {
+      message: "Deleted #{deleted_count}/#{total} case reports from datacenter #{datacenter_id}",
+      audits_deleted: audit_destroyed_count,
+      attachments_deleted: attachment_destroyed_count
+    }, status: :ok
+
+  rescue => e
+    Rails.logger.error("[destroy_by_datacenter] #{e.class} - #{e.message}")
+    render json: { error: 'Internal server error', details: e.message }, status: :internal_server_error
   end
-
 
   private
 
