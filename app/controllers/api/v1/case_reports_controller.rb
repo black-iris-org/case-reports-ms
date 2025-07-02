@@ -60,30 +60,51 @@ class Api::V1::CaseReportsController < ApplicationController
       return render json: { error: 'Missing datacenter_id' }, status: :bad_request
     end
 
-    case_reports = CaseReport.where(datacenter_id: datacenter_id)
+    case_reports = CaseReport.not_deleted.where(datacenter_id: datacenter_id)
     total = case_reports.size
-    deleted_count = 0
     attachment_destroyed_count = 0
-    audit_destroyed_count = 0
+    audits_cleared_count = 0
 
     case_reports.find_each do |report|
-      ReportAudit.where(auditable_id: report.id).each do |audit|
-        if audit.respond_to?(:report_attachment) && audit.report_attachment.present?
-          audit.report_attachment.files.each { |file| file.purge_later } rescue nil
+      begin
+        ReportAudit.where(auditable_id: report.id).each do |audit|
+          if audit.report_attachment.present?
+            begin
+              audit.report_attachment.files.each(&:purge_later)
+            rescue => file_err
+              Rails.logger.warn("File purge failed for ReportAttachment #{audit.report_attachment.id}: #{file_err.message}")
+            end
 
-          audit.report_attachment.destroy
-          attachment_destroyed_count += 1
+            audit.report_attachment.destroy
+            attachment_destroyed_count += 1
+          end
+
+          # Wipe audit sensitive content
+          audit.update!(
+            audited_changes: {},
+            additional_data: {},
+            comment: nil
+          )
+          audits_cleared_count += 1
         end
-      end
 
-      audit_destroyed_count += ReportAudit.where(auditable_id: report.id).delete_all
+        # DELETE CASE REPORTS DATA
+        report.wipe_sensitive_content!(@current_user)
+
+
+
+      rescue => e
+        Rails.logger.error("Failed to wipe report #{report.id}: #{e.class} - #{e.message}")
+      end
     end
 
-    deleted_count = case_reports.delete_all
+    ReportAudit.where(action: 'update')
+               .where("audited_changes -> 'deleted' = '[null,true]'")
+               .update_all(action: 'delete')
 
     render json: {
-      message: "Deleted #{deleted_count}/#{total} case reports from datacenter #{datacenter_id}",
-      audits_deleted: audit_destroyed_count,
+      message: "Wiped #{total} case reports from datacenter #{datacenter_id}",
+      audits_cleared: audits_cleared_count,
       attachments_deleted: attachment_destroyed_count
     }, status: :ok
 
@@ -162,8 +183,9 @@ class Api::V1::CaseReportsController < ApplicationController
   end
 
   def set_case_reports
-    @case_reports = CaseReport.filter_records(filters.to_h).order(id: :desc)
+    @case_reports = CaseReport.not_deleted.filter_records(filters.to_h).order(id: :desc)
   end
+
 
   def serializer_options
     { with_direct_upload_urls: file_params_present? }
