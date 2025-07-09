@@ -25,6 +25,7 @@ class CaseReport < ApplicationRecord
   serialize :content, Serializers::IndifferentHash
 
   scope :by_incident_id, ->(incident_id) { where(incident_id: incident_id) }
+  scope :not_deleted, -> { where(deleted: [false, nil]) }
 
   alias_attribute :version, :audit_version
 
@@ -55,7 +56,36 @@ class CaseReport < ApplicationRecord
   def created_by
     self.responder_name
   end
-  
+
+  def wipe_sensitive_content!(user)
+    return false if self.deleted
+
+    self.deleted = true
+    self.content = nil
+    self.incident_address = nil
+    save!(validate: false)
+
+
+
+    Audited.audit_class.as_user(user) do
+      self.deleted = true
+      self.audit_comment = 'soft-delete'
+      self.update!(
+        responder_name: nil,
+        patient_name: nil,
+        patient_dob: nil,
+        incident_at: nil,
+        location: nil,
+        content: {},
+        incident_address: {},
+        updated_at: Time.current
+      )
+      save!(validate: false)
+    end
+
+    true
+  end
+
   private
 
   def set_defaults
