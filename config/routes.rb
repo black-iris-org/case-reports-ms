@@ -7,6 +7,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :case_reports, only: [:create, :show, :update, :index] do
         get :incident_reports_counts, on: :collection
+        delete :destroy_by_datacenter, on: :collection
         member do
           get 'attachments'
         end
