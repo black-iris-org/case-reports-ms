@@ -53,6 +53,61 @@ class Api::V1::CaseReportsController < ApplicationController
     render json: { incident_id: incident_id, case_reports_count: case_reports_count, revisions_count: revisions_count }
   end
 
+  def delete_individual_case_report
+    case_report_id = params[:id]
+
+    if case_report_id.blank?
+      render json: { error: 'Missing case report id' }, status: :bad_request
+    end
+
+    case_report = CaseReport.not_deleted.find(case_report_id)
+    attachment_destroyed_count = 0
+    audits_cleared_count = 0
+
+    begin
+      ReportAudit.where(auditable_id: case_report.id).each do |audit|
+        if audit.report_attachment.present?
+          begin
+            audit.report_attachment.files.each(&:purge_later)
+          rescue => file_err
+            Rails.logger.warn("File purge failed for ReportAttachment #{audit.report_attachment.id}: #{file_err.message}")
+          end
+
+          audit.report_attachment.destroy
+          attachment_destroyed_count += 1
+        end
+
+        # Wipe audit sensitive content
+        audit.update!(
+          audited_changes: {},
+          additional_data: {},
+          comment: nil
+        )
+        audits_cleared_count += 1
+      end
+
+      # DELETE CASE REPORTS DATA
+      case_report.wipe_sensitive_content!(@current_user)
+
+    rescue => e
+      Rails.logger.error("Failed to wipe report #{case_report.id}: #{e.class} - #{e.message}")
+    end
+
+    ReportAudit.where(action: 'update')
+               .where("audited_changes -> 'deleted' = '[null,true]'")
+               .update_all(action: 'delete')
+
+    render json: {
+      message: "Wiped case report with id #{case_report.id} from datacenter #{case_report.datacenter_id}",
+      audits_cleared: audits_cleared_count,
+      attachments_deleted: attachment_destroyed_count
+    }, status: :ok
+
+  rescue => e
+    Rails.logger.error("[delete_individual_case_report] #{e.class} - #{e.message}")
+    render json: { error: 'Internal server error', details: e.message }, status: :internal_server_error
+  end
+
   def destroy_by_datacenter
     datacenter_id = params[:datacenter_id]
 

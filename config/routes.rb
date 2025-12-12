@@ -8,6 +8,7 @@ Rails.application.routes.draw do
       resources :case_reports, only: [:create, :show, :update, :index] do
         get :incident_reports_counts, on: :collection
         delete :destroy_by_datacenter, on: :collection
+        delete :delete_individual_case_report, on: :member
         member do
           get 'attachments'
         end
