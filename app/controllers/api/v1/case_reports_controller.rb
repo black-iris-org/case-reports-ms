@@ -53,116 +53,39 @@ class Api::V1::CaseReportsController < ApplicationController
     render json: { incident_id: incident_id, case_reports_count: case_reports_count, revisions_count: revisions_count }
   end
 
-  def delete_individual_case_report
-    case_report_id = params[:id]
+  def destroy
+    case_report = CaseReport.find(params[:id])
 
-    if case_report_id.blank?
-      render json: { error: 'Missing case report id' }, status: :bad_request
-    end
-
-    case_report = CaseReport.not_deleted.find(case_report_id)
-    attachment_destroyed_count = 0
-    audits_cleared_count = 0
-
-    begin
-      ReportAudit.where(auditable_id: case_report.id).each do |audit|
-        if audit.report_attachment.present?
-          begin
-            audit.report_attachment.files.each(&:purge_later)
-          rescue => file_err
-            Rails.logger.warn("File purge failed for ReportAttachment #{audit.report_attachment.id}: #{file_err.message}")
-          end
-
-          audit.report_attachment.destroy
-          attachment_destroyed_count += 1
-        end
-
-        # Wipe audit sensitive content
-        audit.update!(
-          audited_changes: {},
-          additional_data: {},
-          comment: nil
-        )
-        audits_cleared_count += 1
-      end
-
-      # DELETE CASE REPORTS DATA
-      case_report.wipe_sensitive_content!(@current_user)
-
-    rescue => e
-      Rails.logger.error("Failed to wipe report #{case_report.id}: #{e.class} - #{e.message}")
-    end
-
-    ReportAudit.where(action: 'update')
-               .where("audited_changes -> 'deleted' = '[null,true]'")
-               .update_all(action: 'delete')
+    result = WipeSensitiveData.new(@current_user).wipe_one(case_report)
 
     render json: {
       message: "Wiped case report with id #{case_report.id} from datacenter #{case_report.datacenter_id}",
-      audits_cleared: audits_cleared_count,
-      attachments_deleted: attachment_destroyed_count
+      audits_cleared: result.audits_cleared,
+      attachments_deleted: result.attachments_deleted,
+      errors: result.errors
     }, status: :ok
-
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: 'CaseReport not found' }, status: :not_found
   rescue => e
-    Rails.logger.error("[delete_individual_case_report] #{e.class} - #{e.message}")
+    Rails.logger.error("[destroy] #{e.class} - #{e.message}")
     render json: { error: 'Internal server error', details: e.message }, status: :internal_server_error
   end
 
   def destroy_by_datacenter
     datacenter_id = params[:datacenter_id]
+    return render json: { error: 'Missing datacenter_id' }, status: :bad_request if datacenter_id.blank?
 
-    if datacenter_id.blank?
-      return render json: { error: 'Missing datacenter_id' }, status: :bad_request
-    end
+    scope  = CaseReport.where(datacenter_id: datacenter_id)
+    return render json: { error: 'Case Report not found' }, status: :not_found unless scope
 
-    case_reports = CaseReport.not_deleted.where(datacenter_id: datacenter_id)
-    total = case_reports.size
-    attachment_destroyed_count = 0
-    audits_cleared_count = 0
-
-    case_reports.find_each do |report|
-      begin
-        ReportAudit.where(auditable_id: report.id).each do |audit|
-          if audit.report_attachment.present?
-            begin
-              audit.report_attachment.files.each(&:purge_later)
-            rescue => file_err
-              Rails.logger.warn("File purge failed for ReportAttachment #{audit.report_attachment.id}: #{file_err.message}")
-            end
-
-            audit.report_attachment.destroy
-            attachment_destroyed_count += 1
-          end
-
-          # Wipe audit sensitive content
-          audit.update!(
-            audited_changes: {},
-            additional_data: {},
-            comment: nil
-          )
-          audits_cleared_count += 1
-        end
-
-        # DELETE CASE REPORTS DATA
-        report.wipe_sensitive_content!(@current_user)
-
-
-
-      rescue => e
-        Rails.logger.error("Failed to wipe report #{report.id}: #{e.class} - #{e.message}")
-      end
-    end
-
-    ReportAudit.where(action: 'update')
-               .where("audited_changes -> 'deleted' = '[null,true]'")
-               .update_all(action: 'delete')
+    result = WipeSensitiveData.new(@current_user).wipe_many(scope)
 
     render json: {
-      message: "Wiped #{total} case reports from datacenter #{datacenter_id}",
-      audits_cleared: audits_cleared_count,
-      attachments_deleted: attachment_destroyed_count
+      message: "Wiped #{result.total} case reports from datacenter #{datacenter_id}",
+      audits_cleared: result.audits_cleared,
+      attachments_deleted: result.attachments_deleted,
+      errors: result.errors
     }, status: :ok
-
   rescue => e
     Rails.logger.error("[destroy_by_datacenter] #{e.class} - #{e.message}")
     render json: { error: 'Internal server error', details: e.message }, status: :internal_server_error
