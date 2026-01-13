@@ -11,12 +11,6 @@
     r
   end
 
-  def wipe_many(scope)
-    r = Result.new(total: scope.count, attachments_deleted: 0, audits_cleared: 0, errors: [])
-    scope.find_each { |report| wipe!(report, r) }
-    r
-  end
-
   private
 
   def wipe!(report, result)
