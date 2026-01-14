@@ -51,6 +51,11 @@ staging:
   monitor_mode: true
   app_name: Case-Reports-Staging
 
+uat:
+  <<: *default_settings
+  monitor_mode: true
+  app_name: Case-Reports-UAT
+
 test:
   <<: *default_settings
   # It doesn't make sense to report to New Relic from automated test runs.
