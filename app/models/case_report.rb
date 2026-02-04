@@ -75,7 +75,6 @@ class CaseReport < ApplicationRecord
         patient_name: nil,
         patient_dob: nil,
         incident_at: nil,
-        location: nil,
         content: {},
         incident_address: {},
         updated_at: Time.current

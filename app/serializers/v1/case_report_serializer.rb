@@ -1,13 +1,12 @@
 class V1::CaseReportSerializer < ApplicationSerializer
   identifier :id
-  fields :datacenter_id, :datacenter_name, :incident_number, :incident_id, :incident_at, :incident_number,
-         :revisions_count, :report_type, :user_id, :attachments, :case_report_user_id, :case_report_user_email
+  fields :incident_number, :incident_id, :incident_at,
+         :report_type, :attachments, :case_report_user_id, :case_report_user_email
 
   # Other Views
   view :list_view do
     excludes :attachments
-    association(:revision, blueprint: ::V1::RevisionSerializer, view: :minimal) { |report| report }
-    association :revisions, blueprint: ::V1::RevisionSerializer, view: :minimal
+    association(:revision, blueprint: ::V1::RevisionSerializer) { |report| report }
     field :has_attachments do |case_report, _options|
       case_report.has_attachments?
     end
@@ -17,11 +16,11 @@ class V1::CaseReportSerializer < ApplicationSerializer
   end
 
   view :show_view do
-    association(:revision, blueprint: ::V1::RevisionSerializer, view: nil) { |report| report }
+    association(:revision, blueprint: ::V1::RevisionSerializer) { |report| report }
   end
 
   view :with_custom_revisions do
-    association :revisions, blueprint: ::V1::RevisionSerializer, view: :minimal do |_, options|
+    association :revisions, blueprint: ::V1::RevisionSerializer do |_, options|
       options[:revisions]
     end
   end

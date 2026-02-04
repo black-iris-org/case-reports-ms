@@ -5,7 +5,7 @@ Rails.application.routes.draw do
   # root "articles#index"
   namespace :api, defaults: { format: :json } do
     namespace :v1 do
-      resources :case_reports, only: [:create, :show, :update, :index] do
+      resources :case_reports, only: [:create, :show, :update, :index, :destroy] do
         get :incident_reports_counts, on: :collection
         delete :destroy_by_datacenter, on: :collection
         member do
