@@ -18,7 +18,7 @@ module CaseReport::FilterConcern
     end
 
     add_filter(:created_by) do |value|
-      where("responder_name ILIKE ?", "%#{value}%")
+      where("responder_name ILIKE :q OR case_report_user_email ILIKE :q", q: "%#{value}%")
     end
 
     add_filter(:incident_address) do |value|

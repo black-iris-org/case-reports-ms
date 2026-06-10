@@ -150,6 +150,7 @@ class Api::V1::CaseReportsController < ApplicationController
 
   def filters
     params.permit(:incident_id, :incident_number, :case_report_id, :incident_at, :created_by, :incident_address)
+          .to_h
           .merge(default_filtration_params)
           .merge(auth_params)
   end
