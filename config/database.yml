@@ -29,6 +29,13 @@ development:
   <<: *default
   database: case_reports_development
 
+uat:
+  <<: *default
+  database: case_reports_uat
+  username: <%= ENV['BEACON_RDS_USERNAME'] %>
+  password: <%= ENV['BEACON_RDS_PASSWORD'] %>
+  host: <%= ENV['BEACON_RDS_HOST'] %>
+  port: <%= ENV['BEACON_RDS_PORT'] %>
 
 staging:
   <<: *default
