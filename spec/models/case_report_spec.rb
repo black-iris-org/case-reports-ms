@@ -80,4 +80,25 @@ RSpec.describe CaseReport, type: :model do
       end
     end
   end
+
+  describe 'public_id' do
+    it 'has a "C" prefix' do
+      expect(CaseReport.new.public_id_prefix).to eq('C')
+    end
+
+    it 'assigns a public_id on create matching the expected format' do
+      expect(case_report.public_id).to match(/\AC-TST-#{Time.current.year}-\d{6}\z/)
+    end
+
+    it 'does not override a public_id supplied at create time' do
+      report = FactoryBot.create(:case_report, public_id: 'C-TST-2000-000001')
+      expect(report.public_id).to eq('C-TST-2000-000001')
+    end
+
+    it 'assigns distinct public_ids to consecutive case reports' do
+      first  = FactoryBot.create(:case_report)
+      second = FactoryBot.create(:case_report)
+      expect(first.public_id).not_to eq(second.public_id)
+    end
+  end
 end
