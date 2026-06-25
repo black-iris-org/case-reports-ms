@@ -1,6 +1,6 @@
 class V1::CaseReportSerializer < ApplicationSerializer
   identifier :id
-  fields :incident_number, :incident_id, :incident_at,
+  fields :public_id, :incident_number, :incident_id, :incident_at,
          :report_type, :attachments, :case_report_user_id, :case_report_user_email
 
   # Other Views
