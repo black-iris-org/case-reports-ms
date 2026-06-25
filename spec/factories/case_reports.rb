@@ -13,7 +13,6 @@ FactoryBot.define do
       }
     end
 
-    sequence(:public_id) { |n| "C-TEST-2026-#{n}" }
     incident_number { rand(1..2147483647) }
     incident_id { 1 }
     datacenter_id { 1 }
