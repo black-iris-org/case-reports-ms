@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_06_30_190544) do
+ActiveRecord::Schema[7.0].define(version: 2026_06_19_000025) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -87,6 +87,8 @@ ActiveRecord::Schema[7.0].define(version: 2025_06_30_190544) do
     t.integer "case_report_user_id"
     t.boolean "deleted"
     t.string "case_report_user_email"
+    t.string "public_id"
+    t.index ["public_id"], name: "index_case_reports_on_public_id", unique: true
   end
 
   create_table "report_attachments", force: :cascade do |t|

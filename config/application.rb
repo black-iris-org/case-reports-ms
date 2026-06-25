@@ -32,5 +32,9 @@ module CaseReportMs
 
     # Add additional load paths for your own custom dirs
     config.autoload_paths += %W(#{config.root}/lib)
+
+    # Region/server abbreviation embedded in generated public_ids
+    # (e.g. "C-<abbr>-<year>-<number>"). Region deployments supply it via ENV.
+    config.x.server_abbreviation = ENV["SERVER_ABBREVIATION"]
   end
 end
