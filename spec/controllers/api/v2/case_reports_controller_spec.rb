@@ -51,6 +51,7 @@ RSpec.describe Api::V2::CaseReportsController, type: :request do
 
       it 'should create case_report' do
         expect(CaseReport.count).to eq(1)
+        expect(json_response[:case_report]).to have_key('public_id')
         expect(json_response[:case_report].with_indifferent_access).to include(datacenter_id:    1,
                                                                                datacenter_name:  'test',
                                                                                incident_id:      valid_attributes[:incident_id],
@@ -131,7 +132,8 @@ RSpec.describe Api::V2::CaseReportsController, type: :request do
 
       it 'should update case_report' do
         expect(json_response[:case_report].symbolize_keys)
-          .to include(datacenter_id:   1,
+          .to include(public_id:       case_report_1.public_id,
+                      datacenter_id:   1,
                       datacenter_name: 'test',
                       incident_id:     case_report_1.incident_id,
                       incident_number: case_report_1.incident_number,
@@ -254,7 +256,8 @@ RSpec.describe Api::V2::CaseReportsController, type: :request do
         case_report_1.reload
 
         expect(json_response[:case_report])
-          .to include(datacenter_id:    1,
+          .to include(public_id:        case_report_1.public_id,
+                      datacenter_id:    1,
                       datacenter_name:  'test',
                       incident_id:      case_report_1.incident_id,
                       incident_number:  case_report_1.incident_number,
@@ -310,6 +313,7 @@ RSpec.describe Api::V2::CaseReportsController, type: :request do
       it 'case_report_2' do
         expect(json_response[:case_reports].first.with_indifferent_access)
           .to include(id:               case_report_2.id,
+                      public_id:        case_report_2.public_id,
                       datacenter_id:    1,
                       datacenter_name:  'test',
                       incident_id:      case_report_2.incident_id,
@@ -326,6 +330,7 @@ RSpec.describe Api::V2::CaseReportsController, type: :request do
         get "/api/v2/case_reports", headers: headers
         expect(json_response[:case_reports].last.with_indifferent_access)
           .to include(id:               case_report_1.id,
+                      public_id:        case_report_1.public_id,
                       datacenter_id:    1,
                       datacenter_name:  'test',
                       incident_id:      case_report_1.incident_id,
@@ -352,6 +357,7 @@ RSpec.describe Api::V2::CaseReportsController, type: :request do
       it 'case_report_2' do
         expect(json_response[:case_reports].first.with_indifferent_access)
           .to include(id:               case_report_2.id,
+                      public_id:        case_report_2.public_id,
                       datacenter_id:    1,
                       datacenter_name:  'test',
                       incident_id:      case_report_2.incident_id,
@@ -367,6 +373,7 @@ RSpec.describe Api::V2::CaseReportsController, type: :request do
       it 'case_report_1' do
         expect(json_response[:case_reports].last.with_indifferent_access)
           .to include(id:               case_report_1.id,
+                      public_id:        case_report_1.public_id,
                       datacenter_id:    1,
                       datacenter_name:  'test',
                       incident_id:      case_report_1.incident_id,
