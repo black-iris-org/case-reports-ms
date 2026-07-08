@@ -3,9 +3,9 @@ namespace :public_ids do
   task backfill: :environment do
     batch_size = Integer(ENV.fetch("BATCH_SIZE", 500))
     pause      = Float(ENV.fetch("SLEEP_SECONDS", 0.25))
-    { "I" => Incident, "P" => PendingIncident }.each do |prefix, model|
-      backfill_model(prefix, model, batch_size, pause)  # "C" => CaseReport in separate repo
-    end
+    prefix = "C"
+    model = CaseReport
+    backfill_model(prefix, model, batch_size, pause)
   end
   def backfill_model(prefix, model, batch_size, pause)
     total = model.where(public_id: nil).count
