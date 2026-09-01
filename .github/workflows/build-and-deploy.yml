@@ -163,6 +163,7 @@ jobs:
           AWS_BUCKET=beacon-uploads-staging
           AWS_REGION=us-east-1
           S3_ENDPOINT=http://minio:9001
+          PUBLIC_ID_CIPHER_KEY=ci-test-public-id-cipher-key-0123456789
           IMAGE_NAME=$IMAGE_NAME
           IMAGE_TAG=$IMAGE_TAG
           t=1

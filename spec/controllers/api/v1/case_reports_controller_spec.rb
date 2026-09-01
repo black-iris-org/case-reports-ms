@@ -49,3 +49,49 @@ RSpec.describe "GET /show auditing", type: :request do
     expect(show_audit.last_name).to eq("Last Name 1")
   end
 end
+
+RSpec.describe Api::V1::CaseReportsController, type: :request do
+  include JsonResponse
+
+  let!(:case_report) { FactoryBot.create(:case_report) }
+
+  let(:valid_attributes) { { incident_number: 1, incident_id: 1, incident_at: Time.now,
+                             report_type: :amended, responder_name: 'test', name: 'test' } }
+
+  let(:headers) do
+    {
+      'Requester-Id':              '1',
+      'Requester-Role':            'Admin',
+      'Requester-Name':            Faker::Name.name,
+      'Requester-Email':           Faker::Internet.email,
+      'Requester-First-Name':      Faker::Name.first_name,
+      'Requester-Last-Name':       Faker::Name.last_name,
+      'Requester-Datacenter':      '1',
+      'Requester-Datacenter-Name': 'test'
+    }
+  end
+
+  describe 'GET #show' do
+    it 'returns public_id' do
+      get "/api/v1/case_reports/#{case_report.id}", headers: headers
+
+      expect(json_response[:case_report]).to include(public_id: case_report.public_id)
+    end
+  end
+
+  describe 'GET #index' do
+    it 'returns public_id' do
+      get "/api/v1/case_reports", headers: headers
+
+      expect(json_response[:case_reports].first).to include(public_id: case_report.public_id)
+    end
+  end
+
+  describe 'POST #create' do
+    it 'returns public_id' do
+      post "/api/v1/case_reports", params: { case_report: valid_attributes }, headers: headers
+
+      expect(json_response[:case_report]).to have_key('public_id')
+    end
+  end
+end

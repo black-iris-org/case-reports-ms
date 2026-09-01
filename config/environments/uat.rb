@@ -7,7 +7,7 @@ Rails.application.configure do
   # Code is not reloaded between requests.
   config.cache_classes = true
 
-  config.x.server_abbreviation = "EU3"
+  config.x.server_abbreviation = "UAT"
 
   # Eager load code on boot. This eager loads most of Rails and
   # your application in memory, allowing both threaded web servers
@@ -50,7 +50,7 @@ Rails.application.configure do
     api_key: ENV['MAILGUN_API'],
     domain: ENV['MAILGUN_DOMAIN'],
   }
-
+  
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   # config.force_ssl = true
 
@@ -103,6 +103,7 @@ Rails.application.configure do
     logger.formatter = config.log_formatter
     config.logger    = ActiveSupport::TaggedLogging.new(logger)
   end
+  config.logger = Logger.new(STDERR)
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false

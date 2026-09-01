@@ -13,6 +13,7 @@ class CaseReport < ApplicationRecord
   has_many :report_audits, foreign_key: :auditable_id
 
   before_create :set_defaults
+  before_create :assign_public_id, if: -> { public_id.blank? }
 
   validates_presence_of :datacenter_id, :incident_number, :incident_id
 
@@ -44,6 +45,7 @@ class CaseReport < ApplicationRecord
     super || audit&.created_at
   end
 
+  def public_id_prefix = "C"
 
   def pdf_attachments
     self.only_pdf_attachments
@@ -92,4 +94,18 @@ class CaseReport < ApplicationRecord
     self.content          ||= {}
   end
 
+  def assign_public_id
+    year   = Time.current.year
+    number = SixDigitCipherHelper.scramble(next_public_id_number(public_id_prefix, year))
+    server_abbreviation = Rails.application.config.x.server_abbreviation
+    self.public_id =
+      "#{public_id_prefix}-#{server_abbreviation}-#{year}-#{format('%06d', number)}"
+  end
+
+  def next_public_id_number(prefix, year)
+    seq  = "public_id_#{prefix.downcase}_#{year}"
+    conn = self.class.connection
+    conn.execute("CREATE SEQUENCE IF NOT EXISTS #{conn.quote_table_name(seq)}")
+    conn.select_value("SELECT nextval(#{conn.quote(seq)})").to_i
+  end
 end
