@@ -10,6 +10,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      slack_ts: ${{ steps.slack_start_deploy.outputs.ts }}
+    env:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
 
     services:
       postgres:
@@ -30,6 +35,57 @@ jobs:
           MINIO_ROOT_PASSWORD: secret_key
 
     steps:
+      - name: Notify Slack - Deploy Started
+        id: slack_start_deploy
+        continue-on-error: true
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          set -euo pipefail
+
+          if [ "$GITHUB_REF_NAME" = "main" ]; then
+            ENVIRONMENT="Production"
+          else
+            ENVIRONMENT="Staging"
+          fi
+
+          if [ -n "$PR_URL" ]; then
+            PR_VALUE="<$PR_URL|#$PR_NUMBER $PR_TITLE>"
+          else
+            PR_VALUE="_direct push — no PR_"
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg channel "$SLACK_CHANNEL_ID" \
+            --arg env "$ENVIRONMENT" \
+            --arg pr "$PR_VALUE" \
+            --arg branch "$BRANCH" \
+            --arg actor "$ACTOR" \
+            '{
+              channel: $channel,
+              text: "*\($env) deploy started*",
+              attachments: [{
+                color: "#d4a017",
+                mrkdwn_in: ["fields"],
+                fields: [
+                  {title: "PR",          value: $pr,     short: false},
+                  {title: "Branch",      value: $branch, short: true},
+                  {title: "Triggered by",value: $actor,  short: true}
+                ]
+              }]
+            }')
+
+          RESPONSE=$(curl -s -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD")
+
+          echo "ts=$(echo "$RESPONSE" | jq -r 'if .ok then .ts else "" end')" >> "$GITHUB_OUTPUT"
+
       - name: Prepare Variables
         env:
           DOCKER_IMAGE_NAME: case-reports-ms
@@ -177,3 +233,54 @@ jobs:
                --network "host" \
                $IMAGE_NAME:$IMAGE_TAG \
                bash -c "bundle exec rails db:create db:schema:load && bundle exec rspec"
+
+  notify:
+    needs: [ build, test ]
+    if: always()
+    runs-on: ubuntu-latest
+    env:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+    steps:
+      - name: Notify Slack - Deploy Result
+        continue-on-error: true
+        env:
+          SLACK_TS: ${{ needs.build.outputs.slack_ts }}
+          BUILD_RESULT: ${{ needs.build.result }}
+          TEST_RESULT: ${{ needs.test.result }}
+        run: |
+          set -euo pipefail
+
+          if [ "$BUILD_RESULT" = "success" ] && [ "$TEST_RESULT" = "success" ]; then
+            COLOR="#36a64f"
+            STATUS=":white_check_mark: *Deploy succeeded*"
+          else
+            COLOR="#d00000"
+            STATUS=":x: *Deploy failed*"
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg channel "$SLACK_CHANNEL_ID" \
+            --arg thread "$SLACK_TS" \
+            --arg status "$STATUS" \
+            --arg color "$COLOR" \
+            --arg build "$BUILD_RESULT" \
+            --arg test "$TEST_RESULT" \
+            '{
+              channel: $channel,
+              text: $status,
+              attachments: [{
+                color: $color,
+                mrkdwn_in: ["fields"],
+                fields: [
+                  {title: "Build", value: $build, short: true},
+                  {title: "Test",  value: $test,  short: true}
+                ]
+              }]
+            }
+            + (if $thread != "" then {thread_ts: $thread} else {} end)')
+
+          curl -s -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD"
