@@ -75,20 +75,15 @@ class Api::V1::CaseReportsController < ApplicationController
     datacenter_id = params[:datacenter_id]
     return render json: { error: 'Missing datacenter_id' }, status: :bad_request if datacenter_id.blank?
 
-    scope  = CaseReport.where(datacenter_id: datacenter_id)
-    return render json: { error: 'Case Report not found' }, status: :not_found unless scope
+    exists = CaseReport.where(datacenter_id: datacenter_id, deleted: nil).exists?
+    return render json: { error: 'Case Report not found' }, status: :not_found unless exists
 
-    result = WipeSensitiveData.new(@current_user).wipe_many(scope)
+    DeleteCaseReportsJob.perform_later(datacenter_id, @current_user)
 
     render json: {
-      message: "Wiped #{result.total} case reports from datacenter #{datacenter_id}",
-      audits_cleared: result.audits_cleared,
-      attachments_deleted: result.attachments_deleted,
-      errors: result.errors
-    }, status: :ok
-  rescue => e
-    Rails.logger.error("[destroy_by_datacenter] #{e.class} - #{e.message}")
-    render json: { error: 'Internal server error', details: e.message }, status: :internal_server_error
+      message: "Deletion queued for datacenter #{datacenter_id}.",
+      status: "processing"
+    }, status: :accepted
   end
 
   private
